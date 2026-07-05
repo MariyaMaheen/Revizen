@@ -29,7 +29,7 @@ app = FastAPI(title="Revizen API", version="1.0.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://revizen-g2zq.vercel.app", "http://localhost:5173"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -49,3 +49,4 @@ app.include_router(insights.router, prefix="/api/v1", tags=["insights"])
 @app.get("/health")
 async def health():
     return {"status": "ok"}#cors fix 
+
