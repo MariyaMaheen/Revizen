@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #0F0F1A;
+  color: #F1F5F9;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2D2D44;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7C3AED;
+}
