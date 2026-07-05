@@ -48,4 +48,4 @@ app.include_router(insights.router, prefix="/api/v1", tags=["insights"])
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok"}#cors fix 
