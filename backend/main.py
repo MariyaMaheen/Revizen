@@ -26,10 +26,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Revizen API", version="1.0.0", lifespan=lifespan)
 
+cors_origins = os.getenv("CORS_ORIGINS", "").split(",")
+if not cors_origins or cors_origins == [""]:
+    cors_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://5173-i0h5tiiyv6lcsgh4ugn8g-5b262517.sg1.manus.computer", "http://localhost:5173"],
-    allow_credentials=False,
+    allow_origins=cors_origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

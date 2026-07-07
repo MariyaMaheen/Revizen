@@ -1,4 +1,4 @@
-const BASE_URL = 'https://8000-i0h5tiiyv6lcsgh4ugn8g-5b262517.sg1.manus.computer'
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 function getToken() {
   return localStorage.getItem('revizen_token')
