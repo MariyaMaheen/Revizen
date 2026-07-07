@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 480
     db_path: str = "./revizen.db"
     insights_path: str = "./insights"
-    cors_origins: str = "http://localhost:5173,https://your-app.vercel.app"
+    cors_origins: str = "http://localhost:5173,https://5173-i0h5tiiyv6lcsgh4ugn8g-5b262517.sg1.manus.computer"
 
     @property
     def cors_origins_list(self) -> List[str]:

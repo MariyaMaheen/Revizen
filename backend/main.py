@@ -28,7 +28,7 @@ app = FastAPI(title="Revizen API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://revizen-g2zq.vercel.app", "http://localhost:5173"],
+    allow_origins=["https://5173-i0h5tiiyv6lcsgh4ugn8g-5b262517.sg1.manus.computer", "http://localhost:5173"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],

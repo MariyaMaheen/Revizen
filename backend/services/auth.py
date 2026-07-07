@@ -1,21 +1,27 @@
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 bearer_scheme = HTTPBearer()
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # bcrypt has a 72-byte limit. We truncate to ensure it doesn't crash.
+    pwd_bytes = password[:72].encode('utf-8')
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(pwd_bytes, salt)
+    return hashed.decode('utf-8')
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    try:
+        return bcrypt.checkpw(plain[:72].encode('utf-8'), hashed.encode('utf-8'))
+    except Exception:
+        return False
 
 
 def create_access_token(user_id: int, username: str) -> str:
