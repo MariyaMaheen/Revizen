@@ -81,7 +81,7 @@ export default function App() {
         docRefreshKey={docRefreshKey}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

@@ -148,7 +148,7 @@ export default function ChatPanel() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
+      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-border flex items-center justify-between flex-shrink-0">
         <h2 className="font-bold text-lg text-text-primary">Chat</h2>
         <button
           onClick={() => setStreamMode(m => !m)}
@@ -163,7 +163,7 @@ export default function ChatPanel() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
         {messages.length === 0 && !streaming && (
           <div className="flex flex-col items-center justify-center h-full text-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -199,7 +199,7 @@ export default function ChatPanel() {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-border flex-shrink-0">
+      <div className="px-4 md:px-6 py-3 md:py-4 border-t border-border flex-shrink-0">
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
             <textarea

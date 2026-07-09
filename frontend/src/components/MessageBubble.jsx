@@ -12,7 +12,7 @@ export default function MessageBubble({ role, content, confidence, sources }) {
       transition={{ duration: 0.3 }}
       className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
     >
-      <div className={`max-w-xl ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
+      <div className={`max-w-[85%] md:max-w-xl ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
         <div
           className={`px-4 py-3 rounded-bubble text-sm leading-relaxed whitespace-pre-wrap ${
             isUser

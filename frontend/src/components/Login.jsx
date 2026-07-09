@@ -131,7 +131,7 @@ export default function Login({ onLogin, addToast }) {
       </div>
 
       {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10">
+      <div className="flex-1 flex items-center justify-center px-4 md:px-6 py-8 md:py-10">
         <div className="w-full max-w-md">
           <div className="md:hidden flex items-center gap-3 mb-8">
             <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
