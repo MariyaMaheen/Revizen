@@ -1,12 +1,17 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Square, Zap, Brain } from 'lucide-react'
+import { Send, Square, Zap, Brain, Trash2 } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import TypingIndicator from './TypingIndicator'
 import { chatStreamUrl, chatPost } from '../api'
 
 export default function ChatPanel() {
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem('revizen_chat')
+      return saved ? JSON.parse(saved) : []
+    } catch { return [] }
+  })
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
   const [streamMode, setStreamMode] = useState(true)
@@ -18,6 +23,15 @@ export default function ChatPanel() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, currentToken])
+
+  useEffect(() => {
+    localStorage.setItem('revizen_chat', JSON.stringify(messages))
+  }, [messages])
+
+  function handleClearChat() {
+    setMessages([])
+    localStorage.removeItem('revizen_chat')
+  }
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -150,16 +164,28 @@ export default function ChatPanel() {
       {/* Header */}
       <div className="px-4 md:px-6 py-3 md:py-4 border-b border-border flex items-center justify-between flex-shrink-0">
         <h2 className="font-bold text-lg text-text-primary">Chat</h2>
-        <button
-          onClick={() => setStreamMode(m => !m)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-btn text-xs font-medium transition-all ${
-            streamMode ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-card text-text-muted border border-border'
-          }`}
-          title="Toggle streaming mode"
-        >
-          <Zap size={12} />
-          {streamMode ? 'Streaming' : 'Full response'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setStreamMode(m => !m)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-btn text-xs font-medium transition-all ${
+              streamMode ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-card text-text-muted border border-border'
+            }`}
+            title="Toggle streaming mode"
+          >
+            <Zap size={12} />
+            {streamMode ? 'Streaming' : 'Full response'}
+          </button>
+          {messages.length > 0 && (
+            <button
+              onClick={handleClearChat}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-btn text-xs font-medium bg-card text-text-muted border border-border hover:text-error hover:border-error/30 transition-all"
+              title="Clear chat"
+            >
+              <Trash2 size={12} />
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
