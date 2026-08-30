@@ -13,6 +13,10 @@ def _get_client():
     return libsql_client.create_client(url=f"file:{settings.db_path}")
 
 
+def _row_to_dict(result, row):
+    return dict(zip(result.columns, row))
+
+
 async def init_db():
     async with _get_client() as client:
         await client.execute("""
@@ -33,7 +37,7 @@ async def get_user_by_username(username: str):
             "SELECT * FROM users WHERE username = ?", [username]
         )
         if result.rows:
-            return dict(zip([c.name for c in result.columns], result.rows[0]))
+            return _row_to_dict(result, result.rows[0])
         return None
 
 
@@ -43,7 +47,7 @@ async def get_user_by_email(email: str):
             "SELECT * FROM users WHERE email = ?", [email]
         )
         if result.rows:
-            return dict(zip([c.name for c in result.columns], result.rows[0]))
+            return _row_to_dict(result, result.rows[0])
         return None
 
 
@@ -53,7 +57,7 @@ async def get_user_by_id(user_id: int):
             "SELECT * FROM users WHERE id = ?", [user_id]
         )
         if result.rows:
-            return dict(zip([c.name for c in result.columns], result.rows[0]))
+            return _row_to_dict(result, result.rows[0])
         return None
 
 
