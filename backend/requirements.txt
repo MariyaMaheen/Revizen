@@ -15,4 +15,4 @@ fastembed
 pytesseract
 pdf2image
 Pillow
-libsql-client
+libsql-experimental
