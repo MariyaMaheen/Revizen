@@ -11,7 +11,7 @@ from config import settings
 
 router = APIRouter()
 
-MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
 
 @router.post("/ingest")
