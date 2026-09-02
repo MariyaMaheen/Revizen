@@ -32,8 +32,8 @@ export default function FileUpload({ onUploadComplete, addToast }) {
       addToast('Only PDF and TXT files are supported', 'error')
       return
     }
-    if (file.size > 20 * 1024 * 1024) {
-      addToast('File too large. Maximum size is 20MB', 'error')
+    if (file.size > 50 * 1024 * 1024) {
+      addToast('File too large. Maximum size is 50MB', 'error')
       return
     }
 
