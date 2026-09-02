@@ -29,7 +29,7 @@ async def ingest(
     file_bytes = await file.read()
 
     if len(file_bytes) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File too large. Maximum size is 20MB")
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 50MB")
 
     # Extract text
     pages_processed = 0
