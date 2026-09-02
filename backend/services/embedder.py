@@ -12,10 +12,14 @@ def get_model():
 def get_embedder(request):
     return request.app.state.embedder
 
-def embed_texts(embedder, texts: List[str]) -> List[List[float]]:
+def embed_texts(embedder, texts: List[str], batch_size: int = 32) -> List[List[float]]:
     model = get_model()
-    embeddings = list(model.embed(texts))
-    return [e.tolist() for e in embeddings]
+    results = []
+    for i in range(0, len(texts), batch_size):
+        batch = texts[i:i + batch_size]
+        embeddings = list(model.embed(batch))
+        results.extend([e.tolist() for e in embeddings])
+    return results
 
 def embed_query(embedder, text: str) -> List[float]:
     model = get_model()
