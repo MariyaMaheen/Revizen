@@ -1,32 +1,26 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, BookOpen, Zap, Brain, BarChart3, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Flame, Zap, BookOpen } from 'lucide-react'
 import { login, register } from '../api'
 
 function PasswordStrength({ password }) {
-  const getStrength = (p) => {
-    if (!p) return { level: 0, label: '', color: '' }
-    let score = 0
-    if (p.length >= 8) score++
-    if (/[A-Z]/.test(p)) score++
-    if (/[0-9]/.test(p)) score++
-    if (/[^A-Za-z0-9]/.test(p)) score++
-    if (score <= 1) return { level: 1, label: 'Weak', color: 'bg-error' }
-    if (score <= 2) return { level: 2, label: 'Medium', color: 'bg-warning' }
-    return { level: 3, label: 'Strong', color: 'bg-success' }
-  }
-
-  const { level, label, color } = getStrength(password)
   if (!password) return null
-
+  let score = 0
+  if (password.length >= 8) score++
+  if (/[A-Z]/.test(password)) score++
+  if (/[0-9]/.test(password)) score++
+  if (/[^A-Za-z0-9]/.test(password)) score++
+  const label = score <= 1 ? 'Weak' : score <= 2 ? 'Fair' : score <= 3 ? 'Good' : 'Strong'
+  const color = score <= 1 ? '#ef4444' : score <= 2 ? '#f59e0b' : score <= 3 ? '#3b82f6' : '#00c896'
   return (
-    <div className="mt-1">
-      <div className="flex gap-1 mb-1">
-        {[1, 2, 3].map(i => (
-          <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= level ? color : 'bg-border'}`} />
+    <div className="mt-2 flex items-center gap-2">
+      <div className="flex gap-1 flex-1">
+        {[1,2,3,4].map(i => (
+          <div key={i} className="h-1 flex-1 rounded-full transition-all duration-300"
+            style={{ background: i <= score ? color : '#1e2d40' }} />
         ))}
       </div>
-      <span className={`text-xs ${level === 1 ? 'text-error' : level === 2 ? 'text-warning' : 'text-success'}`}>{label}</span>
+      <span className="text-xs" style={{ color }}>{label}</span>
     </div>
   )
 }
@@ -36,14 +30,7 @@ export default function Login({ onLogin, addToast }) {
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
   const [errors, setErrors] = useState({})
-
-  const [form, setForm] = useState({
-    full_name: '',
-    username: '',
-    email: '',
-    password: '',
-    confirm_password: '',
-  })
+  const [form, setForm] = useState({ full_name: '', username: '', email: '', password: '', confirm_password: '' })
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -54,14 +41,14 @@ export default function Login({ onLogin, addToast }) {
   function validate() {
     const errs = {}
     if (mode === 'register') {
-      if (!form.full_name.trim()) errs.full_name = 'Full name is required'
-      if (!form.email.trim()) errs.email = 'Email is required'
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Invalid email format'
+      if (!form.full_name.trim()) errs.full_name = 'Full name required'
+      if (!form.email.trim()) errs.email = 'Email required'
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Invalid email'
       if (form.password !== form.confirm_password) errs.confirm_password = 'Passwords do not match'
     }
-    if (!form.username.trim()) errs.username = 'Username is required'
-    if (!form.password) errs.password = 'Password is required'
-    if (form.password && form.password.length < 6) errs.password = 'Password must be at least 6 characters'
+    if (!form.username.trim()) errs.username = 'Username required'
+    if (!form.password) errs.password = 'Password required'
+    if (form.password && form.password.length < 6) errs.password = 'Min 6 characters'
     return errs
   }
 
@@ -69,7 +56,6 @@ export default function Login({ onLogin, addToast }) {
     e.preventDefault()
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
-
     setLoading(true)
     try {
       let data
@@ -88,182 +74,175 @@ export default function Login({ onLogin, addToast }) {
     }
   }
 
-  const features = [
-    { icon: <Brain size={20} />, text: 'AI-powered Q&A from your own notes' },
-    { icon: <Zap size={20} />, text: 'Auto-generate quizzes & flashcards' },
-    { icon: <BookOpen size={20} />, text: 'Instant summaries in any style' },
-    { icon: <BarChart3 size={20} />, text: 'Track weak areas & study streaks' },
-  ]
-
   return (
     <div className="min-h-screen flex bg-bg">
-      {/* Left Panel */}
-      <div className="hidden md:flex flex-col justify-center px-16 w-1/2 bg-sidebar border-r border-border">
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-lg">R</span>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-text-primary">Revizen</h1>
-              <p className="text-text-muted text-sm">Revise without chaos</p>
-            </div>
+      {/* Left — brand panel */}
+      <div className="hidden md:flex flex-col justify-between w-1/2 px-14 py-12"
+        style={{ background: 'linear-gradient(160deg, #0d1220 60%, #0f2318 100%)' }}>
+        {/* Logo */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+            style={{ background: '#00c896' }}>
+            <BookOpen size={18} color="#0a0e1a" />
           </div>
-          <h2 className="text-4xl font-extrabold text-text-primary leading-tight mb-3">
-            Study smarter,<br />not harder.
-          </h2>
-          <p className="text-text-muted text-lg">Upload your notes. Ask anything. Ace every exam.</p>
+          <span className="text-lg font-bold text-text-primary tracking-tight">Revizen</span>
         </div>
-        <div className="space-y-4">
-          {features.map((f, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="flex items-center gap-4 p-4 rounded-card bg-card border border-border"
-            >
-              <div className="text-primary">{f.icon}</div>
-              <span className="text-text-primary">{f.text}</span>
-            </motion.div>
-          ))}
+
+        {/* Hero */}
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill mb-6 text-xs font-medium"
+            style={{ background: '#00c89618', color: '#00c896', border: '1px solid #00c89630' }}>
+            <Flame size={12} /> 42k+ active today
+          </div>
+          <h2 className="text-5xl font-extrabold text-text-primary leading-none mb-4">
+            Your personal<br />
+            <span style={{ color: '#00c896' }}>study brain.</span>
+          </h2>
+          <p className="text-text-muted text-lg leading-relaxed max-w-sm">
+            Turn dense PDFs, lecture slides, and messy notes into examination mastery.
+          </p>
+
+          {/* Sample doc card */}
+          <div className="mt-10 rounded-card p-4" style={{ background: '#111827', border: '1px solid #1e2d40' }}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-semibold text-text-primary">Neurobiology 101</p>
+                <p className="text-xs text-text-muted">Stanford Med · Fall Course</p>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded-pill font-medium"
+                style={{ background: '#00c89618', color: '#00c896' }}>Active</span>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {['Cell Signaling', 'Action Potentials', 'Synaptic Clefts'].map(t => (
+                <span key={t} className="text-xs px-2 py-0.5 rounded-pill"
+                  style={{ background: '#1e2d40', color: '#6b7a99' }}>{t}</span>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="flex-1 h-1.5 rounded-full" style={{ background: '#1e2d40' }}>
+                <div className="h-full rounded-full" style={{ width: '84%', background: '#00c896' }} />
+              </div>
+              <span className="text-xs font-semibold" style={{ color: '#00c896' }}>84% Retained</span>
+            </div>
+            <p className="text-xs text-text-muted mt-2">18 flashcards due in 3h · +120 XP</p>
+          </div>
+        </div>
+
+        {/* Footer badges */}
+        <div className="flex gap-3">
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <Zap size={12} style={{ color: '#00c896' }} /> 900+ Campuses
+          </div>
+          <div className="flex items-center gap-2 text-xs text-text-muted">
+            <Zap size={12} style={{ color: '#f59e0b' }} /> Instant Anki Export
+          </div>
         </div>
       </div>
 
-      {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center px-4 md:px-6 py-8 md:py-10">
-        <div className="w-full max-w-md">
-          <div className="md:hidden flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-white font-bold">R</span>
+      {/* Right — auth form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-10" style={{ background: '#0a0e1a' }}>
+        <div className="w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="md:hidden flex items-center gap-2 mb-8">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#00c896' }}>
+              <BookOpen size={16} color="#0a0e1a" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-text-primary">Revizen</h1>
-              <p className="text-text-muted text-xs">Revise without chaos</p>
-            </div>
+            <span className="font-bold text-text-primary">Revizen</span>
           </div>
 
-          {/* Mode toggle */}
-          <div className="flex rounded-btn bg-card border border-border p-1 mb-8">
+          <h3 className="text-2xl font-bold text-text-primary mb-1">
+            {mode === 'login' ? 'Welcome back' : 'Create account'}
+          </h3>
+          <p className="text-text-muted text-sm mb-8">
+            {mode === 'login' ? 'Pick up where you left off.' : 'Start your study journey today.'}
+          </p>
+
+          {/* Toggle */}
+          <div className="flex rounded-btn p-1 mb-6" style={{ background: '#111827', border: '1px solid #1e2d40' }}>
             {['login', 'register'].map(m => (
-              <button
-                key={m}
-                onClick={() => { setMode(m); setErrors({}) }}
-                className={`flex-1 py-2 rounded text-sm font-medium transition-all duration-200 ${
-                  mode === m
-                    ? 'bg-primary text-white shadow'
-                    : 'text-text-muted hover:text-text-primary'
-                }`}
-              >
-                {m === 'login' ? 'Sign In' : 'Create Account'}
+              <button key={m} onClick={() => { setMode(m); setErrors({}) }}
+                className="flex-1 py-2 rounded text-sm font-medium transition-all duration-200"
+                style={mode === m
+                  ? { background: '#00c896', color: '#0a0e1a' }
+                  : { color: '#6b7a99' }}>
+                {m === 'login' ? 'Sign In' : 'Sign Up'}
               </button>
             ))}
           </div>
 
           <AnimatePresence mode="wait">
-            <motion.form
-              key={mode}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              onSubmit={handleSubmit}
-              className="space-y-4"
-            >
+            <motion.form key={mode}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
+              onSubmit={handleSubmit} className="space-y-4">
+
               {mode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-text-muted mb-1">Full Name</label>
-                  <input
-                    name="full_name"
-                    value={form.full_name}
-                    onChange={handleChange}
+                  <label className="block text-xs font-medium text-text-muted mb-1.5">Full Name</label>
+                  <input name="full_name" value={form.full_name} onChange={handleChange}
                     placeholder="Jane Smith"
-                    className="w-full px-4 py-3 rounded-btn bg-card border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
-                  />
-                  {errors.full_name && <p className="text-error text-xs mt-1">{errors.full_name}</p>}
+                    className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                    style={{ background: '#111827', border: `1px solid ${errors.full_name ? '#ef4444' : '#1e2d40'}` }} />
+                  {errors.full_name && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.full_name}</p>}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Username</label>
-                <input
-                  name="username"
-                  value={form.username}
-                  onChange={handleChange}
-                  placeholder="janesmith"
-                  autoComplete="username"
-                  className="w-full px-4 py-3 rounded-btn bg-card border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
-                />
-                {errors.username && <p className="text-error text-xs mt-1">{errors.username}</p>}
+                <label className="block text-xs font-medium text-text-muted mb-1.5">Username</label>
+                <input name="username" value={form.username} onChange={handleChange}
+                  placeholder="janesmith" autoComplete="username"
+                  className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                  style={{ background: '#111827', border: `1px solid ${errors.username ? '#ef4444' : '#1e2d40'}` }} />
+                {errors.username && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.username}</p>}
               </div>
 
               {mode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-text-muted mb-1">Email</label>
-                  <input
-                    name="email"
-                    type="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="jane@example.com"
-                    className="w-full px-4 py-3 rounded-btn bg-card border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
-                  />
-                  {errors.email && <p className="text-error text-xs mt-1">{errors.email}</p>}
+                  <label className="block text-xs font-medium text-text-muted mb-1.5">Email</label>
+                  <input name="email" type="email" value={form.email} onChange={handleChange}
+                    placeholder="jane@university.edu"
+                    className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                    style={{ background: '#111827', border: `1px solid ${errors.email ? '#ef4444' : '#1e2d40'}` }} />
+                  {errors.email && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.email}</p>}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-text-muted mb-1">Password</label>
+                <label className="block text-xs font-medium text-text-muted mb-1.5">Password</label>
                 <div className="relative">
-                  <input
-                    name="password"
-                    type={showPass ? 'text' : 'password'}
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder="••••••••"
+                  <input name="password" type={showPass ? 'text' : 'password'}
+                    value={form.password} onChange={handleChange} placeholder="••••••••"
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    className="w-full px-4 py-3 pr-12 rounded-btn bg-card border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(p => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
-                  >
-                    {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                    className="w-full px-4 py-3 pr-11 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                    style={{ background: '#111827', border: `1px solid ${errors.password ? '#ef4444' : '#1e2d40'}` }} />
+                  <button type="button" onClick={() => setShowPass(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
+                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                {errors.password && <p className="text-error text-xs mt-1">{errors.password}</p>}
+                {errors.password && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.password}</p>}
                 {mode === 'register' && <PasswordStrength password={form.password} />}
               </div>
 
               {mode === 'register' && (
                 <div>
-                  <label className="block text-sm font-medium text-text-muted mb-1">Confirm Password</label>
-                  <input
-                    name="confirm_password"
-                    type={showPass ? 'text' : 'password'}
-                    value={form.confirm_password}
-                    onChange={handleChange}
-                    placeholder="••••••••"
+                  <label className="block text-xs font-medium text-text-muted mb-1.5">Confirm Password</label>
+                  <input name="confirm_password" type={showPass ? 'text' : 'password'}
+                    value={form.confirm_password} onChange={handleChange} placeholder="••••••••"
                     autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-btn bg-card border border-border text-text-primary placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
-                  />
-                  {errors.confirm_password && <p className="text-error text-xs mt-1">{errors.confirm_password}</p>}
+                    className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                    style={{ background: '#111827', border: `1px solid ${errors.confirm_password ? '#ef4444' : '#1e2d40'}` }} />
+                  {errors.confirm_password && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.confirm_password}</p>}
                 </div>
               )}
 
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-3 rounded-btn bg-primary hover:bg-primary-hover text-white font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed mt-6"
-              >
-                {loading ? (
-                  <><Loader2 size={18} className="animate-spin" /> {mode === 'login' ? 'Signing in...' : 'Creating account...'}</>
-                ) : (
-                  mode === 'login' ? 'Sign In' : 'Create Account'
-                )}
+              <motion.button type="submit" disabled={loading}
+                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
+                className="w-full py-3 rounded-btn font-semibold text-sm mt-2 flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+                style={{ background: '#00c896', color: '#0a0e1a' }}>
+                {loading
+                  ? <><Loader2 size={16} className="animate-spin" /> {mode === 'login' ? 'Signing in...' : 'Creating...'}</>
+                  : mode === 'login' ? 'Sign In' : 'Create Account'}
               </motion.button>
             </motion.form>
           </AnimatePresence>
