@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { login, register } from '../api'
+import { login, register, googleAuth } from '../api'
+
+const GOOGLE_CLIENT_ID = '726843762663-5smu3k88ivo8so3mnu6ssn4ngpvs0m9v.apps.googleusercontent.com'
 
 export default function Login({ onLogin, addToast }) {
   const [mode, setMode] = useState('login')
@@ -10,6 +12,53 @@ export default function Login({ onLogin, addToast }) {
   const [errors, setErrors] = useState({})
   const [focused, setFocused] = useState('')
   const [form, setForm] = useState({ full_name: '', username: '', email: '', password: '', confirm_password: '' })
+  const tokenClientRef = useRef(null)
+
+  useEffect(() => {
+    function initClient() {
+      tokenClientRef.current = window.google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: 'openid email profile',
+        callback: async (response) => {
+          if (response.error) {
+            addToast('Google sign-in was cancelled or failed', 'error')
+            return
+          }
+          setLoading(true)
+          try {
+            const data = await googleAuth(response.access_token)
+            localStorage.setItem('revizen_token', data.token)
+            localStorage.setItem('revizen_user', JSON.stringify(data.user))
+            onLogin(data.user)
+          } catch (err) {
+            addToast(err.message, 'error')
+          } finally {
+            setLoading(false)
+          }
+        },
+      })
+    }
+
+    if (window.google?.accounts?.oauth2) {
+      initClient()
+    } else {
+      const check = setInterval(() => {
+        if (window.google?.accounts?.oauth2) {
+          initClient()
+          clearInterval(check)
+        }
+      }, 200)
+      return () => clearInterval(check)
+    }
+  }, [])
+
+  function handleGoogleClick() {
+    if (tokenClientRef.current) {
+      tokenClientRef.current.requestAccessToken()
+    } else {
+      addToast('Google sign-in is still loading — try again in a second', 'error')
+    }
+  }
 
   function handleChange(e) {
     const { name, value } = e.target
@@ -95,7 +144,7 @@ export default function Login({ onLogin, addToast }) {
         padding: '40px 44px 36px',
       }}>
 
-        {/* Wordmark — plain, bold, no funk */}
+        {/* Wordmark */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <span style={{ fontSize: 24, fontWeight: 800, color: INK, letterSpacing: '-0.3px' }}>
             Revizen
@@ -183,16 +232,15 @@ export default function Login({ onLogin, addToast }) {
           <div style={{ flex: 1, height: 1, background: BORDER }} />
         </div>
 
-        {/* OAuth buttons — visual only, wire up when you add these providers */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button type="button" style={{
-            width: '100%', padding: '13px 0', borderRadius: 10, border: `1.5px solid ${BORDER}`,
-            background: '#fff', color: INK, fontWeight: 700, fontSize: 13, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'inherit',
-          }}>
-            <GoogleIcon /> Continue with Google
-          </button>
-        </div>
+        {/* Google — wired to real OAuth */}
+        <button type="button" onClick={handleGoogleClick} disabled={loading} style={{
+          width: '100%', padding: '13px 0', borderRadius: 10, border: `1.5px solid ${BORDER}`,
+          background: '#fff', color: INK, fontWeight: 700, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'inherit',
+          opacity: loading ? 0.7 : 1,
+        }}>
+          <GoogleIcon /> Continue with Google
+        </button>
       </div>
     </div>
   )
