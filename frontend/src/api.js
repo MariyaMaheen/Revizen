@@ -46,6 +46,15 @@ export async function login(username, password) {
   return handleResponse(res)
 }
 
+export async function googleAuth(access_token) {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ access_token }),
+  })
+  return handleResponse(res)
+}
+
 export async function getMe() {
   const res = await fetch(`${BASE_URL}/api/v1/auth/me`, {
     headers: { ...authHeaders() },
