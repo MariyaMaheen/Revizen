@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Loader2, User, Lock, Sparkles } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { login, register } from '../api'
 
 export default function Login({ onLogin, addToast }) {
@@ -52,173 +52,166 @@ export default function Login({ onLogin, addToast }) {
     }
   }
 
-  // ---- Funky palette ----
-  const PINK = '#ff3d81'
-  const YELLOW = '#ffd23f'
-  const PURPLE = '#7b2d8b'
-  const BLUE = '#3d8bff'
-  const INK = '#1a1a1a'
+  const INK = '#0f172a'
+  const BORDER = '#e2e8f0'
+  const FOCUS = '#3b82f6'
+  const BTN = '#64748b'
+  const BTN_HOVER = '#54606f'
 
-  const inputStyle = (err) => ({
-    width: '100%', padding: '13px 14px 13px 40px',
-    borderRadius: 10, border: `2.5px solid ${err ? '#e53e3e' : INK}`,
-    background: '#fff', color: INK, fontSize: 13, fontWeight: 600,
+  const [focused, setFocused] = useState('')
+
+  const inputStyle = (name, err) => ({
+    width: '100%', padding: '15px 18px',
+    borderRadius: 14, border: `2px solid ${err ? '#e53e3e' : focused === name ? FOCUS : BORDER}`,
+    background: '#fff', color: INK, fontSize: 14, fontWeight: 500,
     outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-    transition: 'transform 0.15s, box-shadow 0.15s',
+    transition: 'border-color 0.15s',
   })
 
-  const Field = ({ name, icon, placeholder, type = 'text', err, ...rest }) => (
-    <div style={{ position: 'relative' }}>
-      <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: INK, display: 'flex' }}>{icon}</span>
+  const Field = ({ name, placeholder, type = 'text', err, ...rest }) => (
+    <div>
       <input
         name={name}
         value={form[name]}
         onChange={handleChange}
+        onFocus={() => setFocused(name)}
+        onBlur={() => setFocused('')}
         placeholder={placeholder}
         type={type}
-        style={inputStyle(err)}
-        onFocus={(e) => { e.target.style.boxShadow = `4px 4px 0px ${PURPLE}`; e.target.style.transform = 'translate(-2px,-2px)' }}
-        onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.transform = 'none' }}
+        style={inputStyle(name, err)}
         {...rest}
       />
-      {err && <p style={{ fontSize: 11, fontWeight: 700, color: '#e53e3e', marginTop: 4 }}>{err}</p>}
+      {err && <p style={{ fontSize: 11, fontWeight: 600, color: '#e53e3e', marginTop: 4, marginLeft: 4 }}>{err}</p>}
     </div>
   )
 
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'Inter, sans-serif', position: 'relative', overflow: 'hidden',
-      background: `linear-gradient(135deg, ${PURPLE} 0%, #2a1330 60%, ${INK} 100%)`,
-      padding: 24,
+      fontFamily: "'Nunito', 'Baloo 2', Inter, sans-serif", background: '#f7f8fa', padding: 24,
     }}>
-
-      {/* Floating funky blobs */}
-      <motion.div animate={{ y: [0, 20, 0], rotate: [0, 15, 0] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ position: 'absolute', top: '8%', left: '8%', width: 160, height: 160, borderRadius: '42% 58% 65% 35% / 45% 45% 55% 55%', background: YELLOW, filter: 'blur(2px)', opacity: 0.85 }} />
-      <motion.div animate={{ y: [0, -25, 0], rotate: [0, -20, 0] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ position: 'absolute', bottom: '10%', left: '14%', width: 90, height: 90, borderRadius: '50%', background: PINK, opacity: 0.8 }} />
-      <motion.div animate={{ y: [0, 18, 0], x: [0, -10, 0] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ position: 'absolute', top: '15%', right: '10%', width: 130, height: 130, borderRadius: '50%', border: `6px solid ${BLUE}`, opacity: 0.6 }} />
-      <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-        style={{ position: 'absolute', bottom: '6%', right: '8%', width: 120, height: 120, opacity: 0.5 }}>
-        <svg viewBox="0 0 100 100" width="100%" height="100%">
-          <circle cx="50" cy="50" r="42" fill="none" stroke={YELLOW} strokeWidth="4" strokeDasharray="8 10" />
-        </svg>
-      </motion.div>
-
-      {/* Rotated sticker badge */}
       <motion.div
-        initial={{ rotate: -12 }} animate={{ rotate: [-12, -6, -12] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
         style={{
-          position: 'absolute', top: 40, left: '50%', marginLeft: -260, zIndex: 5,
-          background: YELLOW, color: INK, fontWeight: 800, fontSize: 12, letterSpacing: '0.05em',
-          padding: '8px 16px', borderRadius: 999, border: `2.5px solid ${INK}`,
-          display: 'flex', alignItems: 'center', gap: 6, boxShadow: `3px 3px 0px ${INK}`,
-        }}>
-        <Sparkles size={14} /> HEY THERE!
-      </motion.div>
-
-      {/* Main card — neubrutalist */}
-      <motion.div
-        initial={{ opacity: 0, y: 20, rotate: -1 }}
-        animate={{ opacity: 1, y: 0, rotate: -1 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        style={{
-          position: 'relative', zIndex: 2, width: '100%', maxWidth: 380,
-          background: '#fff', borderRadius: 24, border: `3px solid ${INK}`,
-          boxShadow: `10px 10px 0px ${PINK}`,
-          padding: '38px 32px 32px',
+          width: '100%', maxWidth: 480, background: '#fff', borderRadius: 28,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 20px 40px rgba(15,23,42,0.06)',
+          padding: '44px 48px 40px',
         }}>
 
-        {/* Logo blob */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 22 }}>
-          <div style={{
-            width: 60, height: 60, borderRadius: '38% 62% 60% 40% / 45% 40% 60% 55%',
-            background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: `2.5px solid ${INK}`, marginBottom: 10, boxShadow: `3px 3px 0px ${INK}`,
+        {/* Wordmark */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <span style={{
+            fontFamily: "'Baloo 2', 'Fredoka', 'Nunito', sans-serif",
+            fontSize: 30, fontWeight: 800, color: INK, letterSpacing: '-0.5px',
           }}>
-            <span style={{ color: '#fff', fontWeight: 900, fontSize: 24 }}>R</span>
-          </div>
-          <span style={{ fontSize: 15, fontWeight: 900, color: INK, letterSpacing: '0.2em' }}>REVIZEN</span>
+            Revizen
+          </span>
         </div>
 
-        {/* Mode toggle — pill tabs */}
+        {/* Pill toggle */}
         <div style={{
-          display: 'flex', background: '#f1f1f1', borderRadius: 999, padding: 4,
-          border: `2px solid ${INK}`, marginBottom: 26, position: 'relative',
+          display: 'flex', background: '#eef0f3', borderRadius: 999, padding: 5,
+          marginBottom: 28, position: 'relative', maxWidth: 260, marginLeft: 'auto', marginRight: 'auto',
         }}>
-          {['login', 'register'].map(m => (
+          {['register', 'login'].map(m => (
             <button key={m} onClick={() => { setMode(m); setErrors({}) }}
               style={{
-                flex: 1, position: 'relative', zIndex: 1, padding: '9px 0', borderRadius: 999, border: 'none',
-                cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em',
-                color: mode === m ? '#fff' : INK, background: 'transparent', transition: 'color 0.2s',
+                flex: 1, position: 'relative', zIndex: 1, padding: '10px 0', borderRadius: 999, border: 'none',
+                cursor: 'pointer', fontFamily: 'inherit', fontSize: 14, fontWeight: 700,
+                color: mode === m ? INK : '#94a3b8', background: 'transparent', transition: 'color 0.2s',
               }}>
               {mode === m && (
-                <motion.div layoutId="tab-bg" transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  style={{ position: 'absolute', inset: 0, borderRadius: 999, background: PURPLE, zIndex: -1, border: `2px solid ${INK}` }} />
+                <motion.div layoutId="tab-bg" transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  style={{ position: 'absolute', inset: 0, borderRadius: 999, background: '#fff', zIndex: -1, boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }} />
               )}
-              {m === 'login' ? 'LOGIN' : 'SIGN UP'}
+              {m === 'login' ? 'Sign in' : 'Sign up'}
             </button>
           ))}
         </div>
 
+        <p style={{ textAlign: 'center', fontSize: 15, fontWeight: 700, color: INK, marginBottom: 22 }}>
+          {mode === 'login' ? 'Sign in to your account' : 'Sign up with your email'}
+        </p>
+
         <AnimatePresence mode="wait">
           <motion.form key={mode}
-            initial={{ opacity: 0, x: mode === 'login' ? -12 : 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: mode === 'login' ? 12 : -12 }}
-            transition={{ duration: 0.18 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
             onSubmit={handleSubmit}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
               {mode === 'register' && (
-                <Field name="full_name" icon={<User size={14} />} placeholder="Full Name" err={errors.full_name} />
+                <Field name="full_name" placeholder="Full Name" err={errors.full_name} />
               )}
 
-              <Field name="username" icon={<User size={14} />} placeholder="Username" autoComplete="username" err={errors.username} />
+              <Field name="username" placeholder="Username" autoComplete="username" err={errors.username} />
 
               {mode === 'register' && (
-                <Field name="email" type="email" icon={<User size={14} />} placeholder="Email Address" err={errors.email} />
+                <Field name="email" type="email" placeholder="Email" err={errors.email} />
               )}
 
               <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: INK, display: 'flex' }}><Lock size={14} /></span>
                 <input name="password" type={showPass ? 'text' : 'password'}
-                  value={form.password} onChange={handleChange} placeholder="Password"
+                  value={form.password} onChange={handleChange}
+                  onFocus={() => setFocused('password')} onBlur={() => setFocused('')}
+                  placeholder="Password"
                   autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  style={{ ...inputStyle(errors.password), paddingRight: 42 }} />
+                  style={{ ...inputStyle('password', errors.password), paddingRight: 46 }} />
                 <button type="button" onClick={() => setShowPass(p => !p)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: INK, padding: 0, display: 'flex' }}>
-                  {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                  style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', padding: 0, display: 'flex' }}>
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
-                {errors.password && <p style={{ fontSize: 11, fontWeight: 700, color: '#e53e3e', marginTop: 4 }}>{errors.password}</p>}
+                {errors.password && <p style={{ fontSize: 11, fontWeight: 600, color: '#e53e3e', marginTop: 4, marginLeft: 4 }}>{errors.password}</p>}
               </div>
 
               {mode === 'register' && (
-                <Field name="confirm_password" type={showPass ? 'text' : 'password'} icon={<Lock size={14} />}
+                <Field name="confirm_password" type={showPass ? 'text' : 'password'}
                   placeholder="Confirm Password" autoComplete="new-password" err={errors.confirm_password} />
               )}
 
               <motion.button type="submit" disabled={loading}
-                whileHover={{ y: -2, boxShadow: `5px 5px 0px ${INK}` }}
-                whileTap={{ y: 0, boxShadow: `2px 2px 0px ${INK}` }}
+                whileHover={{ background: BTN_HOVER }} whileTap={{ scale: 0.99 }}
                 style={{
-                  width: '100%', padding: '13px 0', borderRadius: 10, border: `2.5px solid ${INK}`,
-                  background: `linear-gradient(90deg, ${PINK}, ${YELLOW})`, color: INK, fontWeight: 800, fontSize: 13,
+                  width: '100%', padding: '15px 0', borderRadius: 14, border: 'none',
+                  background: BTN, color: '#fff', fontWeight: 700, fontSize: 15,
                   cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontFamily: 'inherit', letterSpacing: '0.1em', marginTop: 6,
-                  boxShadow: `3px 3px 0px ${INK}`, transition: 'box-shadow 0.15s',
+                  fontFamily: 'inherit', marginTop: 4,
                 }}>
-                {loading ? <Loader2 size={15} className="animate-spin" /> : mode === 'login' ? 'LOGIN' : 'CREATE ACCOUNT'}
+                {loading ? <Loader2 size={16} className="animate-spin" /> : mode === 'login' ? 'Sign in' : 'Sign up'}
               </motion.button>
             </div>
           </motion.form>
         </AnimatePresence>
+
+        {/* Divider */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '28px 0 20px' }}>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8' }}>Other options</span>
+          <div style={{ flex: 1, height: 1, background: '#e2e8f0' }} />
+        </div>
+
+        {/* OAuth buttons (visual only — wire up if/when you add these providers) */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <button type="button" style={{
+            width: '100%', padding: '14px 0', borderRadius: 14, border: `1.5px solid ${BORDER}`,
+            background: '#fff', color: INK, fontWeight: 700, fontSize: 14, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: 'inherit',
+          }}>
+            <AppleIcon /> Continue with Apple
+          </button>
+          <button type="button" style={{
+            width: '100%', padding: '14px 0', borderRadius: 14, border: `1.5px solid ${BORDER}`,
+            background: '#fff', color: INK, fontWeight: 700, fontSize: 14, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontFamily: 'inherit',
+          }}>
+            <GoogleIcon /> Continue with Google
+          </button>
+        </div>
       </motion.div>
     </div>
   )
 }
+
+function AppleIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 384 512" fill="currentColor">
