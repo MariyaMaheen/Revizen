@@ -1,4 +1,6 @@
 import re
+import secrets
+import httpx
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, EmailStr
 from typing import Optional
@@ -19,6 +21,10 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+
+class GoogleAuthRequest(BaseModel):
+    access_token: str
 
 
 def validate_email(email: str) -> bool:
@@ -63,6 +69,50 @@ async def login(body: LoginRequest):
     user = await get_user_by_username(body.username)
     if not user or not verify_password(body.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    token = create_access_token(user["id"], user["username"])
+    return {
+        "token": token,
+        "user": {
+            "id": user["id"],
+            "username": user["username"],
+            "email": user["email"],
+            "full_name": user["full_name"],
+        },
+    }
+
+
+@router.post("/google")
+async def google_login(body: GoogleAuthRequest):
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {body.access_token}"},
+        )
+
+    if resp.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    profile = resp.json()
+    email = profile.get("email")
+    if not email or profile.get("email_verified") in (False, "false"):
+        raise HTTPException(status_code=400, detail="Google account has no verified email")
+
+    full_name = profile.get("name") or ""
+
+    user = await get_user_by_email(email)
+    if not user:
+        base_username = re.sub(r"[^a-zA-Z0-9_]", "", email.split("@")[0]) or "user"
+        username = base_username
+        suffix = 0
+        while await get_user_by_username(username):
+            suffix += 1
+            username = f"{base_username}{suffix}"
+
+        random_password = secrets.token_urlsafe(32)
+        hashed = hash_password(random_password)
+        await create_user(username, email, hashed, full_name)
+        user = await get_user_by_username(username)
 
     token = create_access_token(user["id"], user["username"])
     return {
