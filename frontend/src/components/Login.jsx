@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Loader2, User, Lock, Mail } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { login, register } from '../api'
 
 export default function Login({ onLogin, addToast }) {
@@ -19,13 +19,13 @@ export default function Login({ onLogin, addToast }) {
   function validate() {
     const errs = {}
     if (mode === 'register') {
-      if (!form.full_name.trim()) errs.full_name = 'Required'
-      if (!form.email.trim()) errs.email = 'Required'
+      if (!form.full_name.trim()) errs.full_name = 'Full name required'
+      if (!form.email.trim()) errs.email = 'Email required'
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Invalid email'
       if (form.password !== form.confirm_password) errs.confirm_password = 'Passwords do not match'
     }
-    if (!form.username.trim()) errs.username = 'Required'
-    if (!form.password) errs.password = 'Required'
+    if (!form.username.trim()) errs.username = 'Username required'
+    if (!form.password) errs.password = 'Password required'
     if (form.password && form.password.length < 6) errs.password = 'Min 6 characters'
     return errs
   }
@@ -52,145 +52,107 @@ export default function Login({ onLogin, addToast }) {
     }
   }
 
+  const inp = (err) => ({
+    width: '100%', padding: '9px 12px', borderRadius: 0,
+    border: 'none', borderBottom: `1.5px solid ${err ? '#e53e3e' : '#ddd'}`,
+    background: 'transparent', color: '#333', fontSize: 13,
+    outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+  })
+
+  const DARK = '#6b2d5e'
+  const MID  = '#9b4a82'
+  const LIGHT = '#c47aaa'
+
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#2d1b3d', fontFamily: 'Inter, sans-serif', padding: 16,
-    }}>
-      <div style={{
-        display: 'flex', borderRadius: 16, overflow: 'hidden',
-        width: '100%', maxWidth: 760, minHeight: 460,
-        boxShadow: '0 24px 80px rgba(0,0,0,0.5)',
-      }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: DARK, fontFamily: 'Inter, sans-serif', padding: 16 }}>
+      <div style={{ display: 'flex', width: '100%', maxWidth: 720, minHeight: 420, borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.4)' }}>
 
-        {/* Left — geometric panel with tabs */}
-        <div style={{
-          width: 200, flexShrink: 0, background: '#7b2d6e',
-          position: 'relative', overflow: 'hidden', display: 'flex',
-          flexDirection: 'column', alignItems: 'center', paddingTop: 40,
-        }} className="left-geo">
-
-          {/* Geometric shapes */}
-          <div style={{ position: 'absolute', top: -60, left: -60, width: 220, height: 220, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
-          <div style={{ position: 'absolute', bottom: -80, right: -80, width: 260, height: 260, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-          <div style={{ position: 'absolute', top: 80, right: -40, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-
-          {/* Logo */}
-          <div style={{ position: 'relative', zIndex: 1, marginBottom: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.25)' }}>
-              <span style={{ color: '#fff', fontWeight: 800, fontSize: 22, letterSpacing: '-1px' }}>R</span>
+        {/* Left geometric panel */}
+        <div style={{ flex: '0 0 42%', background: DARK, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 32 }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 220px 220px 0', borderColor: `transparent ${MID} transparent transparent` }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '120px 0 0 120px', borderColor: `transparent transparent transparent ${MID}` }} />
+          <div style={{ position: 'absolute', top: '38%', left: '18%', width: 120, height: 120, background: LIGHT, transform: 'rotate(45deg)', opacity: 0.3 }} />
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: DARK, fontWeight: 800, fontSize: 13 }}>R</span>
+              </div>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>Revizen</span>
             </div>
-            <span style={{ color: '#fff', fontWeight: 700, fontSize: 15, letterSpacing: 1, textTransform: 'uppercase' }}>Revizen</span>
-          </div>
-
-          {/* Tabs */}
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: 4, width: '100%', padding: '0 20px' }}>
-            {[{ id: 'login', label: 'LOGIN' }, { id: 'register', label: 'SIGN UP' }].map(t => (
-              <button key={t.id} onClick={() => { setMode(t.id); setErrors({}) }}
-                style={{
-                  padding: '10px 16px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                  fontWeight: 700, fontSize: 12, letterSpacing: 1, fontFamily: 'inherit',
-                  background: mode === t.id ? 'rgba(255,255,255,0.18)' : 'transparent',
-                  color: mode === t.id ? '#fff' : 'rgba(255,255,255,0.45)',
-                  textAlign: 'left', transition: 'all 0.15s',
-                  borderLeft: mode === t.id ? '3px solid #fff' : '3px solid transparent',
-                }}>
-                {t.label}
-              </button>
-            ))}
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: 0 }}>Your Study Brain</p>
           </div>
         </div>
 
-        {/* Right — form */}
-        <div style={{ flex: 1, background: '#f5f5f5', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 36px' }}>
-
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a2e', marginBottom: 6, textAlign: 'center' }}>
-            {mode === 'login' ? 'LOGIN' : 'CREATE ACCOUNT'}
-          </h2>
-          <p style={{ fontSize: 12, color: '#999', textAlign: 'center', marginBottom: 28, letterSpacing: 0.3 }}>
-            {mode === 'login' ? 'Sign in to your account' : 'Fill in the details below'}
-          </p>
+        {/* Right form panel */}
+        <div style={{ flex: 1, background: '#fafafa', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 36px' }}>
+          <div style={{ display: 'flex', gap: 20, marginBottom: 28, borderBottom: '1px solid #eee', paddingBottom: 12 }}>
+            {['login', 'register'].map(m => (
+              <button key={m} onClick={() => { setMode(m); setErrors({}) }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', padding: '0 0 4px 0', color: mode === m ? DARK : '#bbb', borderBottom: mode === m ? `2px solid ${DARK}` : '2px solid transparent' }}>
+                {m === 'login' ? 'LOGIN' : 'SIGN UP'}
+              </button>
+            ))}
+          </div>
 
           <AnimatePresence mode="wait">
-            <motion.form key={mode}
-              initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }}
-              onSubmit={handleSubmit}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <motion.form key={mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.12 }} onSubmit={handleSubmit}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
 
                 {mode === 'register' && (
-                  <div style={{ position: 'relative' }}>
-                    <User size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#bbb' }} />
-                    <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name"
-                      style={{ width: '100%', padding: '10px 14px 10px 36px', borderRadius: 6, border: `1px solid ${errors.full_name ? '#e53e3e' : '#ddd'}`, background: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#1a1a2e', boxSizing: 'border-box' }} />
+                  <div>
+                    <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" style={inp(errors.full_name)} />
                     {errors.full_name && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.full_name}</p>}
                   </div>
                 )}
 
-                <div style={{ position: 'relative' }}>
-                  <User size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#bbb' }} />
-                  <input name="username" value={form.username} onChange={handleChange} placeholder="Username"
-                    autoComplete="username"
-                    style={{ width: '100%', padding: '10px 14px 10px 36px', borderRadius: 6, border: `1px solid ${errors.username ? '#e53e3e' : '#ddd'}`, background: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#1a1a2e', boxSizing: 'border-box' }} />
+                <div>
+                  <input name="username" value={form.username} onChange={handleChange} placeholder="Username" autoComplete="username" style={inp(errors.username)} />
                   {errors.username && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.username}</p>}
                 </div>
 
                 {mode === 'register' && (
-                  <div style={{ position: 'relative' }}>
-                    <Mail size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#bbb' }} />
-                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email Address"
-                      style={{ width: '100%', padding: '10px 14px 10px 36px', borderRadius: 6, border: `1px solid ${errors.email ? '#e53e3e' : '#ddd'}`, background: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#1a1a2e', boxSizing: 'border-box' }} />
+                  <div>
+                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email Address" style={inp(errors.email)} />
                     {errors.email && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.email}</p>}
                   </div>
                 )}
 
-                <div style={{ position: 'relative' }}>
-                  <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#bbb' }} />
-                  <input name="password" type={showPass ? 'text' : 'password'} value={form.password} onChange={handleChange} placeholder="Password"
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    style={{ width: '100%', padding: '10px 40px 10px 36px', borderRadius: 6, border: `1px solid ${errors.password ? '#e53e3e' : '#ddd'}`, background: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#1a1a2e', boxSizing: 'border-box' }} />
-                  <button type="button" onClick={() => setShowPass(p => !p)}
-                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#bbb', padding: 0, display: 'flex' }}>
-                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
+                <div>
+                  <div style={{ position: 'relative' }}>
+                    <input name="password" type={showPass ? 'text' : 'password'} value={form.password} onChange={handleChange} placeholder="Password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} style={{ ...inp(errors.password), paddingRight: 36 }} />
+                    <button type="button" onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#bbb', padding: 0, display: 'flex' }}>
+                      {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  </div>
                   {errors.password && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.password}</p>}
                 </div>
 
                 {mode === 'register' && (
-                  <div style={{ position: 'relative' }}>
-                    <Lock size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#bbb' }} />
-                    <input name="confirm_password" type={showPass ? 'text' : 'password'} value={form.confirm_password} onChange={handleChange} placeholder="Confirm Password"
-                      autoComplete="new-password"
-                      style={{ width: '100%', padding: '10px 14px 10px 36px', borderRadius: 6, border: `1px solid ${errors.confirm_password ? '#e53e3e' : '#ddd'}`, background: '#fff', fontSize: 13, fontFamily: 'inherit', outline: 'none', color: '#1a1a2e', boxSizing: 'border-box' }} />
+                  <div>
+                    <input name="confirm_password" type={showPass ? 'text' : 'password'} value={form.confirm_password} onChange={handleChange} placeholder="Confirm Password" autoComplete="new-password" style={inp(errors.confirm_password)} />
                     {errors.confirm_password && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.confirm_password}</p>}
                   </div>
                 )}
 
-                <motion.button type="submit" disabled={loading}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    padding: '11px 0', borderRadius: 6, border: 'none',
-                    background: '#7b2d6e', color: '#fff', fontWeight: 700,
-                    fontSize: 13, letterSpacing: 1, cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center',
-                    justifyContent: 'center', gap: 8, fontFamily: 'inherit',
-                    textTransform: 'uppercase', marginTop: 4,
-                  }}>
-                  {loading
-                    ? <><Loader2 size={14} className="animate-spin" />{mode === 'login' ? 'Signing in...' : 'Creating...'}</>
-                    : mode === 'login' ? 'Login' : 'Create Account'}
-                </motion.button>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+                  <motion.button type="submit" disabled={loading} whileTap={{ scale: 0.97 }}
+                    style={{ padding: '10px 28px', borderRadius: 4, border: 'none', background: DARK, color: '#fff', fontWeight: 700, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'inherit', letterSpacing: '0.05em' }}>
+                    {loading ? <Loader2 size={14} className="animate-spin" /> : mode === 'login' ? 'LOGIN' : 'CREATE'}
+                  </motion.button>
+                </div>
+
+                <p style={{ fontSize: 12, color: '#aaa', textAlign: 'center', marginTop: 4 }}>
+                  {mode === 'login' ? "No account? " : "Have an account? "}
+                  <button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setErrors({}) }}
+                    style={{ color: DARK, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}>
+                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
+                  </button>
+                </p>
               </div>
             </motion.form>
           </AnimatePresence>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 560px) {
-          .left-geo { display: none !important; }
-        }
-      `}</style>
     </div>
   )
 }
