@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Loader2, User, Lock } from 'lucide-react'
+import { Eye, EyeOff, Loader2, User, Lock, Sparkles } from 'lucide-react'
 import { login, register } from '../api'
 
 export default function Login({ onLogin, addToast }) {
@@ -52,140 +52,173 @@ export default function Login({ onLogin, addToast }) {
     }
   }
 
-  const DARK = '#3d1a47'
-  const MID  = '#7b2d8b'
-  const LIGHT = '#a855b5'
+  // ---- Funky palette ----
+  const PINK = '#ff3d81'
+  const YELLOW = '#ffd23f'
+  const PURPLE = '#7b2d8b'
+  const BLUE = '#3d8bff'
+  const INK = '#1a1a1a'
 
-  const inp = (err, icon) => (
+  const inputStyle = (err) => ({
+    width: '100%', padding: '13px 14px 13px 40px',
+    borderRadius: 10, border: `2.5px solid ${err ? '#e53e3e' : INK}`,
+    background: '#fff', color: INK, fontSize: 13, fontWeight: 600,
+    outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+    transition: 'transform 0.15s, box-shadow 0.15s',
+  })
+
+  const Field = ({ name, icon, placeholder, type = 'text', err, ...rest }) => (
     <div style={{ position: 'relative' }}>
-      <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}>{icon}</span>
-      {arguments[2]}
-      {err && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{err}</p>}
+      <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: INK, display: 'flex' }}>{icon}</span>
+      <input
+        name={name}
+        value={form[name]}
+        onChange={handleChange}
+        placeholder={placeholder}
+        type={type}
+        style={inputStyle(err)}
+        onFocus={(e) => { e.target.style.boxShadow = `4px 4px 0px ${PURPLE}`; e.target.style.transform = 'translate(-2px,-2px)' }}
+        onBlur={(e) => { e.target.style.boxShadow = 'none'; e.target.style.transform = 'none' }}
+        {...rest}
+      />
+      {err && <p style={{ fontSize: 11, fontWeight: 700, color: '#e53e3e', marginTop: 4 }}>{err}</p>}
     </div>
   )
 
-  const inputStyle = (err) => ({
-    width: '100%', padding: '12px 14px 12px 40px',
-    borderRadius: 8, border: `1.5px solid ${err ? '#e53e3e' : '#e2e8f0'}`,
-    background: '#fff', color: '#1a202c', fontSize: 13,
-    outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-  })
-
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: 'Inter, sans-serif', background: DARK }}>
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'Inter, sans-serif', position: 'relative', overflow: 'hidden',
+      background: `linear-gradient(135deg, ${PURPLE} 0%, #2a1330 60%, ${INK} 100%)`,
+      padding: 24,
+    }}>
 
-      {/* Left panel — full height */}
-      <div style={{ width: '30%', minWidth: 200, background: MID, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 60 }}>
-        {/* Decorative circles */}
-        <div style={{ position: 'absolute', bottom: -80, left: -80, width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ position: 'absolute', bottom: 60, left: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-        <div style={{ position: 'absolute', top: 180, right: -60, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+      {/* Floating funky blobs */}
+      <motion.div animate={{ y: [0, 20, 0], rotate: [0, 15, 0] }} transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ position: 'absolute', top: '8%', left: '8%', width: 160, height: 160, borderRadius: '42% 58% 65% 35% / 45% 45% 55% 55%', background: YELLOW, filter: 'blur(2px)', opacity: 0.85 }} />
+      <motion.div animate={{ y: [0, -25, 0], rotate: [0, -20, 0] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ position: 'absolute', bottom: '10%', left: '14%', width: 90, height: 90, borderRadius: '50%', background: PINK, opacity: 0.8 }} />
+      <motion.div animate={{ y: [0, 18, 0], x: [0, -10, 0] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+        style={{ position: 'absolute', top: '15%', right: '10%', width: 130, height: 130, borderRadius: '50%', border: `6px solid ${BLUE}`, opacity: 0.6 }} />
+      <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+        style={{ position: 'absolute', bottom: '6%', right: '8%', width: 120, height: 120, opacity: 0.5 }}>
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <circle cx="50" cy="50" r="42" fill="none" stroke={YELLOW} strokeWidth="4" strokeDasharray="8 10" />
+        </svg>
+      </motion.div>
 
-        {/* Logo */}
-        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)' }}>
-            <span style={{ color: '#fff', fontWeight: 800, fontSize: 26 }}>R</span>
+      {/* Rotated sticker badge */}
+      <motion.div
+        initial={{ rotate: -12 }} animate={{ rotate: [-12, -6, -12] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          position: 'absolute', top: 40, left: '50%', marginLeft: -260, zIndex: 5,
+          background: YELLOW, color: INK, fontWeight: 800, fontSize: 12, letterSpacing: '0.05em',
+          padding: '8px 16px', borderRadius: 999, border: `2.5px solid ${INK}`,
+          display: 'flex', alignItems: 'center', gap: 6, boxShadow: `3px 3px 0px ${INK}`,
+        }}>
+        <Sparkles size={14} /> HEY THERE!
+      </motion.div>
+
+      {/* Main card — neubrutalist */}
+      <motion.div
+        initial={{ opacity: 0, y: 20, rotate: -1 }}
+        animate={{ opacity: 1, y: 0, rotate: -1 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        style={{
+          position: 'relative', zIndex: 2, width: '100%', maxWidth: 380,
+          background: '#fff', borderRadius: 24, border: `3px solid ${INK}`,
+          boxShadow: `10px 10px 0px ${PINK}`,
+          padding: '38px 32px 32px',
+        }}>
+
+        {/* Logo blob */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 22 }}>
+          <div style={{
+            width: 60, height: 60, borderRadius: '38% 62% 60% 40% / 45% 40% 60% 55%',
+            background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: `2.5px solid ${INK}`, marginBottom: 10, boxShadow: `3px 3px 0px ${INK}`,
+          }}>
+            <span style={{ color: '#fff', fontWeight: 900, fontSize: 24 }}>R</span>
           </div>
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: '0.15em' }}>REVIZEN</span>
+          <span style={{ fontSize: 15, fontWeight: 900, color: INK, letterSpacing: '0.2em' }}>REVIZEN</span>
         </div>
 
-        {/* Nav tabs */}
-        <div style={{ position: 'relative', zIndex: 2, marginTop: 48, width: '80%', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Mode toggle — pill tabs */}
+        <div style={{
+          display: 'flex', background: '#f1f1f1', borderRadius: 999, padding: 4,
+          border: `2px solid ${INK}`, marginBottom: 26, position: 'relative',
+        }}>
           {['login', 'register'].map(m => (
             <button key={m} onClick={() => { setMode(m); setErrors({}) }}
               style={{
-                padding: '10px 20px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                fontFamily: 'inherit', fontSize: 13, fontWeight: 700, letterSpacing: '0.08em',
-                textAlign: 'left', transition: 'all 0.15s',
-                background: mode === m ? 'rgba(255,255,255,0.18)' : 'transparent',
-                color: mode === m ? '#fff' : 'rgba(255,255,255,0.45)',
-                borderLeft: mode === m ? '3px solid #fff' : '3px solid transparent',
+                flex: 1, position: 'relative', zIndex: 1, padding: '9px 0', borderRadius: 999, border: 'none',
+                cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 800, letterSpacing: '0.08em',
+                color: mode === m ? '#fff' : INK, background: 'transparent', transition: 'color 0.2s',
               }}>
+              {mode === m && (
+                <motion.div layoutId="tab-bg" transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  style={{ position: 'absolute', inset: 0, borderRadius: 999, background: PURPLE, zIndex: -1, border: `2px solid ${INK}` }} />
+              )}
               {m === 'login' ? 'LOGIN' : 'SIGN UP'}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Right panel — full height, light */}
-      <div style={{ flex: 1, background: '#f0f0f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 48px' }}>
-        <div style={{ width: '100%', maxWidth: 400 }}>
+        <AnimatePresence mode="wait">
+          <motion.form key={mode}
+            initial={{ opacity: 0, x: mode === 'login' ? -12 : 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: mode === 'login' ? 12 : -12 }}
+            transition={{ duration: 0.18 }}
+            onSubmit={handleSubmit}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-          <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1a202c', textAlign: 'center', marginBottom: 6, letterSpacing: '-0.3px' }}>
-            {mode === 'login' ? 'LOGIN' : 'SIGN UP'}
-          </h2>
-          <p style={{ fontSize: 13, color: '#718096', textAlign: 'center', marginBottom: 32 }}>
-            {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
-          </p>
+              {mode === 'register' && (
+                <Field name="full_name" icon={<User size={14} />} placeholder="Full Name" err={errors.full_name} />
+              )}
 
-          <AnimatePresence mode="wait">
-            <motion.form key={mode}
-              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.12 }}
-              onSubmit={handleSubmit}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <Field name="username" icon={<User size={14} />} placeholder="Username" autoComplete="username" err={errors.username} />
 
-                {mode === 'register' && (
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><User size={14} /></span>
-                    <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" style={inputStyle(errors.full_name)} />
-                    {errors.full_name && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.full_name}</p>}
-                  </div>
-                )}
+              {mode === 'register' && (
+                <Field name="email" type="email" icon={<User size={14} />} placeholder="Email Address" err={errors.email} />
+              )}
 
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><User size={14} /></span>
-                  <input name="username" value={form.username} onChange={handleChange} placeholder="Username" autoComplete="username" style={inputStyle(errors.username)} />
-                  {errors.username && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.username}</p>}
-                </div>
-
-                {mode === 'register' && (
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><User size={14} /></span>
-                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email Address" style={inputStyle(errors.email)} />
-                    {errors.email && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.email}</p>}
-                  </div>
-                )}
-
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><Lock size={14} /></span>
-                  <input name="password" type={showPass ? 'text' : 'password'}
-                    value={form.password} onChange={handleChange} placeholder="Password"
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    style={{ ...inputStyle(errors.password), paddingRight: 42 }} />
-                  <button type="button" onClick={() => setShowPass(p => !p)}
-                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', padding: 0, display: 'flex' }}>
-                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                  {errors.password && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.password}</p>}
-                </div>
-
-                {mode === 'register' && (
-                  <div style={{ position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><Lock size={14} /></span>
-                    <input name="confirm_password" type={showPass ? 'text' : 'password'}
-                      value={form.confirm_password} onChange={handleChange} placeholder="Confirm Password"
-                      autoComplete="new-password" style={inputStyle(errors.confirm_password)} />
-                    {errors.confirm_password && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.confirm_password}</p>}
-                  </div>
-                )}
-
-                <motion.button type="submit" disabled={loading}
-                  whileTap={{ scale: 0.98 }}
-                  style={{
-                    width: '100%', padding: '13px 0', borderRadius: 8, border: 'none',
-                    background: MID, color: '#fff', fontWeight: 700, fontSize: 13,
-                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                    fontFamily: 'inherit', letterSpacing: '0.1em', marginTop: 6,
-                  }}>
-                  {loading ? <Loader2 size={15} className="animate-spin" /> : mode === 'login' ? 'LOGIN' : 'CREATE ACCOUNT'}
-                </motion.button>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: INK, display: 'flex' }}><Lock size={14} /></span>
+                <input name="password" type={showPass ? 'text' : 'password'}
+                  value={form.password} onChange={handleChange} placeholder="Password"
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  style={{ ...inputStyle(errors.password), paddingRight: 42 }} />
+                <button type="button" onClick={() => setShowPass(p => !p)}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: INK, padding: 0, display: 'flex' }}>
+                  {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+                {errors.password && <p style={{ fontSize: 11, fontWeight: 700, color: '#e53e3e', marginTop: 4 }}>{errors.password}</p>}
               </div>
-            </motion.form>
-          </AnimatePresence>
-        </div>
-      </div>
+
+              {mode === 'register' && (
+                <Field name="confirm_password" type={showPass ? 'text' : 'password'} icon={<Lock size={14} />}
+                  placeholder="Confirm Password" autoComplete="new-password" err={errors.confirm_password} />
+              )}
+
+              <motion.button type="submit" disabled={loading}
+                whileHover={{ y: -2, boxShadow: `5px 5px 0px ${INK}` }}
+                whileTap={{ y: 0, boxShadow: `2px 2px 0px ${INK}` }}
+                style={{
+                  width: '100%', padding: '13px 0', borderRadius: 10, border: `2.5px solid ${INK}`,
+                  background: `linear-gradient(90deg, ${PINK}, ${YELLOW})`, color: INK, fontWeight: 800, fontSize: 13,
+                  cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  fontFamily: 'inherit', letterSpacing: '0.1em', marginTop: 6,
+                  boxShadow: `3px 3px 0px ${INK}`, transition: 'box-shadow 0.15s',
+                }}>
+                {loading ? <Loader2 size={15} className="animate-spin" /> : mode === 'login' ? 'LOGIN' : 'CREATE ACCOUNT'}
+              </motion.button>
+            </div>
+          </motion.form>
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }
