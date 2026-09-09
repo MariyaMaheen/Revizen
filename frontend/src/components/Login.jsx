@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Loader2, Flame, Zap, BookOpen } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { login, register } from '../api'
 
 function PasswordStrength({ password }) {
@@ -75,179 +75,130 @@ export default function Login({ onLogin, addToast }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-bg">
-      {/* Left — brand panel */}
-      <div className="hidden md:flex flex-col justify-between w-1/2 px-14 py-12"
-        style={{ background: 'linear-gradient(160deg, #0d1220 60%, #0f2318 100%)' }}>
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: '#00c896' }}>
-            <BookOpen size={18} color="#0a0e1a" />
-          </div>
-          <span className="text-lg font-bold text-text-primary tracking-tight">Revizen</span>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4"
+      style={{ background: '#0a0e1a' }}>
+
+      {/* Logo */}
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center mb-10">
+        {/* Bookmark icon */}
+        <svg width="40" height="48" viewBox="0 0 40 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-3">
+          <rect x="4" y="0" width="32" height="48" rx="4" fill="#00c896" />
+          <path d="M4 32 L20 44 L36 32 L36 48 L4 48 Z" fill="#0a0e1a" opacity="0.15"/>
+          <path d="M4 36 L20 48 L36 36" fill="none" stroke="#0a0e1a" strokeWidth="2.5" strokeLinejoin="round"/>
+        </svg>
+        <span className="text-2xl font-extrabold tracking-tight" style={{ color: '#e8eaf0' }}>Revizen</span>
+        <span className="text-xs mt-1" style={{ color: '#3d4f6b' }}>Your personal study brain</span>
+      </motion.div>
+
+      {/* Card */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        className="w-full max-w-sm rounded-card p-8"
+        style={{ background: '#111827', border: '1px solid #1e2d40' }}>
+
+        <h3 className="text-lg font-bold text-text-primary mb-1">
+          {mode === 'login' ? 'Welcome back' : 'Create account'}
+        </h3>
+        <p className="text-sm mb-6" style={{ color: '#3d4f6b' }}>
+          {mode === 'login' ? 'Pick up where you left off.' : 'Start your study journey.'}
+        </p>
+
+        {/* Toggle */}
+        <div className="flex rounded-btn p-1 mb-6" style={{ background: '#0a0e1a', border: '1px solid #1e2d40' }}>
+          {['login', 'register'].map(m => (
+            <button key={m} onClick={() => { setMode(m); setErrors({}) }}
+              className="flex-1 py-2 rounded text-sm font-medium transition-all duration-200"
+              style={mode === m
+                ? { background: '#00c896', color: '#0a0e1a' }
+                : { color: '#6b7a99', background: 'transparent' }}>
+              {m === 'login' ? 'Sign In' : 'Sign Up'}
+            </button>
+          ))}
         </div>
 
-        {/* Hero */}
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill mb-6 text-xs font-medium"
-            style={{ background: '#00c89618', color: '#00c896', border: '1px solid #00c89630' }}>
-            <Flame size={12} /> 42k+ active today
-          </div>
-          <h2 className="text-5xl font-extrabold text-text-primary leading-none mb-4">
-            Your personal<br />
-            <span style={{ color: '#00c896' }}>study brain.</span>
-          </h2>
-          <p className="text-text-muted text-lg leading-relaxed max-w-sm">
-            Turn dense PDFs, lecture slides, and messy notes into examination mastery.
-          </p>
+        <AnimatePresence mode="wait">
+          <motion.form key={mode}
+            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15 }}
+            onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Sample doc card */}
-          <div className="mt-10 rounded-card p-4" style={{ background: '#111827', border: '1px solid #1e2d40' }}>
-            <div className="flex items-center justify-between mb-3">
+            {mode === 'register' && (
               <div>
-                <p className="text-sm font-semibold text-text-primary">Neurobiology 101</p>
-                <p className="text-xs text-text-muted">Stanford Med · Fall Course</p>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7a99' }}>Full Name</label>
+                <input name="full_name" value={form.full_name} onChange={handleChange}
+                  placeholder="Jane Smith"
+                  className="w-full px-4 py-2.5 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                  style={{ background: '#0a0e1a', border: `1px solid ${errors.full_name ? '#ef4444' : '#1e2d40'}` }} />
+                {errors.full_name && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.full_name}</p>}
               </div>
-              <span className="text-xs px-2 py-0.5 rounded-pill font-medium"
-                style={{ background: '#00c89618', color: '#00c896' }}>Active</span>
+            )}
+
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7a99' }}>Username</label>
+              <input name="username" value={form.username} onChange={handleChange}
+                placeholder="janesmith" autoComplete="username"
+                className="w-full px-4 py-2.5 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                style={{ background: '#0a0e1a', border: `1px solid ${errors.username ? '#ef4444' : '#1e2d40'}` }} />
+              {errors.username && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.username}</p>}
             </div>
-            <div className="flex gap-2 flex-wrap">
-              {['Cell Signaling', 'Action Potentials', 'Synaptic Clefts'].map(t => (
-                <span key={t} className="text-xs px-2 py-0.5 rounded-pill"
-                  style={{ background: '#1e2d40', color: '#6b7a99' }}>{t}</span>
-              ))}
-            </div>
-            <div className="mt-3 flex items-center gap-3">
-              <div className="flex-1 h-1.5 rounded-full" style={{ background: '#1e2d40' }}>
-                <div className="h-full rounded-full" style={{ width: '84%', background: '#00c896' }} />
-              </div>
-              <span className="text-xs font-semibold" style={{ color: '#00c896' }}>84% Retained</span>
-            </div>
-            <p className="text-xs text-text-muted mt-2">18 flashcards due in 3h · +120 XP</p>
-          </div>
-        </div>
 
-        {/* Footer badges */}
-        <div className="flex gap-3">
-          <div className="flex items-center gap-2 text-xs text-text-muted">
-            <Zap size={12} style={{ color: '#00c896' }} /> 900+ Campuses
-          </div>
-          <div className="flex items-center gap-2 text-xs text-text-muted">
-            <Zap size={12} style={{ color: '#f59e0b' }} /> Instant Anki Export
-          </div>
-        </div>
-      </div>
-
-      {/* Right — auth form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-10" style={{ background: '#0a0e1a' }}>
-        <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="md:hidden flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: '#00c896' }}>
-              <BookOpen size={16} color="#0a0e1a" />
-            </div>
-            <span className="font-bold text-text-primary">Revizen</span>
-          </div>
-
-          <h3 className="text-2xl font-bold text-text-primary mb-1">
-            {mode === 'login' ? 'Welcome back' : 'Create account'}
-          </h3>
-          <p className="text-text-muted text-sm mb-8">
-            {mode === 'login' ? 'Pick up where you left off.' : 'Start your study journey today.'}
-          </p>
-
-          {/* Toggle */}
-          <div className="flex rounded-btn p-1 mb-6" style={{ background: '#111827', border: '1px solid #1e2d40' }}>
-            {['login', 'register'].map(m => (
-              <button key={m} onClick={() => { setMode(m); setErrors({}) }}
-                className="flex-1 py-2 rounded text-sm font-medium transition-all duration-200"
-                style={mode === m
-                  ? { background: '#00c896', color: '#0a0e1a' }
-                  : { color: '#6b7a99' }}>
-                {m === 'login' ? 'Sign In' : 'Sign Up'}
-              </button>
-            ))}
-          </div>
-
-          <AnimatePresence mode="wait">
-            <motion.form key={mode}
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-              onSubmit={handleSubmit} className="space-y-4">
-
-              {mode === 'register' && (
-                <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">Full Name</label>
-                  <input name="full_name" value={form.full_name} onChange={handleChange}
-                    placeholder="Jane Smith"
-                    className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
-                    style={{ background: '#111827', border: `1px solid ${errors.full_name ? '#ef4444' : '#1e2d40'}` }} />
-                  {errors.full_name && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.full_name}</p>}
-                </div>
-              )}
-
+            {mode === 'register' && (
               <div>
-                <label className="block text-xs font-medium text-text-muted mb-1.5">Username</label>
-                <input name="username" value={form.username} onChange={handleChange}
-                  placeholder="janesmith" autoComplete="username"
-                  className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
-                  style={{ background: '#111827', border: `1px solid ${errors.username ? '#ef4444' : '#1e2d40'}` }} />
-                {errors.username && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.username}</p>}
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7a99' }}>Email</label>
+                <input name="email" type="email" value={form.email} onChange={handleChange}
+                  placeholder="jane@university.edu"
+                  className="w-full px-4 py-2.5 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                  style={{ background: '#0a0e1a', border: `1px solid ${errors.email ? '#ef4444' : '#1e2d40'}` }} />
+                {errors.email && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.email}</p>}
               </div>
+            )}
 
-              {mode === 'register' && (
-                <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">Email</label>
-                  <input name="email" type="email" value={form.email} onChange={handleChange}
-                    placeholder="jane@university.edu"
-                    className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
-                    style={{ background: '#111827', border: `1px solid ${errors.email ? '#ef4444' : '#1e2d40'}` }} />
-                  {errors.email && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.email}</p>}
-                </div>
-              )}
+            <div>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7a99' }}>Password</label>
+              <div className="relative">
+                <input name="password" type={showPass ? 'text' : 'password'}
+                  value={form.password} onChange={handleChange} placeholder="••••••••"
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  className="w-full px-4 py-2.5 pr-11 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                  style={{ background: '#0a0e1a', border: `1px solid ${errors.password ? '#ef4444' : '#1e2d40'}` }} />
+                <button type="button" onClick={() => setShowPass(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: '#3d4f6b' }}>
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+              {errors.password && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.password}</p>}
+              {mode === 'register' && <PasswordStrength password={form.password} />}
+            </div>
 
+            {mode === 'register' && (
               <div>
-                <label className="block text-xs font-medium text-text-muted mb-1.5">Password</label>
-                <div className="relative">
-                  <input name="password" type={showPass ? 'text' : 'password'}
-                    value={form.password} onChange={handleChange} placeholder="••••••••"
-                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                    className="w-full px-4 py-3 pr-11 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
-                    style={{ background: '#111827', border: `1px solid ${errors.password ? '#ef4444' : '#1e2d40'}` }} />
-                  <button type="button" onClick={() => setShowPass(p => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
-                    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-                {errors.password && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.password}</p>}
-                {mode === 'register' && <PasswordStrength password={form.password} />}
+                <label className="block text-xs font-medium mb-1.5" style={{ color: '#6b7a99' }}>Confirm Password</label>
+                <input name="confirm_password" type={showPass ? 'text' : 'password'}
+                  value={form.confirm_password} onChange={handleChange} placeholder="••••••••"
+                  autoComplete="new-password"
+                  className="w-full px-4 py-2.5 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
+                  style={{ background: '#0a0e1a', border: `1px solid ${errors.confirm_password ? '#ef4444' : '#1e2d40'}` }} />
+                {errors.confirm_password && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.confirm_password}</p>}
               </div>
+            )}
 
-              {mode === 'register' && (
-                <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">Confirm Password</label>
-                  <input name="confirm_password" type={showPass ? 'text' : 'password'}
-                    value={form.confirm_password} onChange={handleChange} placeholder="••••••••"
-                    autoComplete="new-password"
-                    className="w-full px-4 py-3 rounded-btn text-sm text-text-primary placeholder-text-dim focus:outline-none transition-colors"
-                    style={{ background: '#111827', border: `1px solid ${errors.confirm_password ? '#ef4444' : '#1e2d40'}` }} />
-                  {errors.confirm_password && <p className="text-xs mt-1" style={{ color: '#ef4444' }}>{errors.confirm_password}</p>}
-                </div>
-              )}
+            <motion.button type="submit" disabled={loading}
+              whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}
+              className="w-full py-2.5 rounded-btn font-semibold text-sm mt-2 flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+              style={{ background: '#00c896', color: '#0a0e1a' }}>
+              {loading
+                ? <><Loader2 size={15} className="animate-spin" /> {mode === 'login' ? 'Signing in...' : 'Creating...'}</>
+                : mode === 'login' ? 'Sign In' : 'Create Account'}
+            </motion.button>
+          </motion.form>
+        </AnimatePresence>
+      </motion.div>
 
-              <motion.button type="submit" disabled={loading}
-                whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-                className="w-full py-3 rounded-btn font-semibold text-sm mt-2 flex items-center justify-center gap-2 transition-all disabled:opacity-60"
-                style={{ background: '#00c896', color: '#0a0e1a' }}>
-                {loading
-                  ? <><Loader2 size={16} className="animate-spin" /> {mode === 'login' ? 'Signing in...' : 'Creating...'}</>
-                  : mode === 'login' ? 'Sign In' : 'Create Account'}
-              </motion.button>
-            </motion.form>
-          </AnimatePresence>
-        </div>
-      </div>
+      <p className="text-xs mt-6" style={{ color: '#1e2d40' }}>
+        Revizen · Study smarter, not harder
+      </p>
     </div>
   )
 }
