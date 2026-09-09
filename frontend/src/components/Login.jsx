@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, User, Lock } from 'lucide-react'
 import { login, register } from '../api'
 
 export default function Login({ onLogin, addToast }) {
@@ -52,102 +52,135 @@ export default function Login({ onLogin, addToast }) {
     }
   }
 
-  const inp = (err) => ({
-    width: '100%', padding: '9px 12px', borderRadius: 0,
-    border: 'none', borderBottom: `1.5px solid ${err ? '#e53e3e' : '#ddd'}`,
-    background: 'transparent', color: '#333', fontSize: 13,
+  const DARK = '#3d1a47'
+  const MID  = '#7b2d8b'
+  const LIGHT = '#a855b5'
+
+  const inp = (err, icon) => (
+    <div style={{ position: 'relative' }}>
+      <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}>{icon}</span>
+      {arguments[2]}
+      {err && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{err}</p>}
+    </div>
+  )
+
+  const inputStyle = (err) => ({
+    width: '100%', padding: '12px 14px 12px 40px',
+    borderRadius: 8, border: `1.5px solid ${err ? '#e53e3e' : '#e2e8f0'}`,
+    background: '#fff', color: '#1a202c', fontSize: 13,
     outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
   })
 
-  const DARK = '#6b2d5e'
-  const MID  = '#9b4a82'
-  const LIGHT = '#c47aaa'
-
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: DARK, fontFamily: 'Inter, sans-serif', padding: 16 }}>
-      <div style={{ display: 'flex', width: '100%', maxWidth: 720, minHeight: 420, borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.4)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: 'Inter, sans-serif', background: DARK }}>
 
-        {/* Left geometric panel */}
-        <div style={{ flex: '0 0 42%', background: DARK, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 32 }}>
-          <div style={{ position: 'absolute', top: 0, right: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 220px 220px 0', borderColor: `transparent ${MID} transparent transparent` }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '120px 0 0 120px', borderColor: `transparent transparent transparent ${MID}` }} />
-          <div style={{ position: 'absolute', top: '38%', left: '18%', width: 120, height: 120, background: LIGHT, transform: 'rotate(45deg)', opacity: 0.3 }} />
-          <div style={{ position: 'relative', zIndex: 2 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: DARK, fontWeight: 800, fontSize: 13 }}>R</span>
-              </div>
-              <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>Revizen</span>
-            </div>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', margin: 0 }}>Your Study Brain</p>
+      {/* Left panel — full height */}
+      <div style={{ width: '30%', minWidth: 200, background: MID, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingTop: 60 }}>
+        {/* Decorative circles */}
+        <div style={{ position: 'absolute', bottom: -80, left: -80, width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+        <div style={{ position: 'absolute', bottom: 60, left: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ position: 'absolute', top: 180, right: -60, width: 180, height: 180, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+
+        {/* Logo */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(255,255,255,0.3)' }}>
+            <span style={{ color: '#fff', fontWeight: 800, fontSize: 26 }}>R</span>
           </div>
+          <span style={{ fontSize: 16, fontWeight: 800, color: '#fff', letterSpacing: '0.15em' }}>REVIZEN</span>
         </div>
 
-        {/* Right form panel */}
-        <div style={{ flex: 1, background: '#fafafa', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '40px 36px' }}>
-          <div style={{ display: 'flex', gap: 20, marginBottom: 28, borderBottom: '1px solid #eee', paddingBottom: 12 }}>
-            {['login', 'register'].map(m => (
-              <button key={m} onClick={() => { setMode(m); setErrors({}) }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit', padding: '0 0 4px 0', color: mode === m ? DARK : '#bbb', borderBottom: mode === m ? `2px solid ${DARK}` : '2px solid transparent' }}>
-                {m === 'login' ? 'LOGIN' : 'SIGN UP'}
-              </button>
-            ))}
-          </div>
+        {/* Nav tabs */}
+        <div style={{ position: 'relative', zIndex: 2, marginTop: 48, width: '80%', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {['login', 'register'].map(m => (
+            <button key={m} onClick={() => { setMode(m); setErrors({}) }}
+              style={{
+                padding: '10px 20px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                fontFamily: 'inherit', fontSize: 13, fontWeight: 700, letterSpacing: '0.08em',
+                textAlign: 'left', transition: 'all 0.15s',
+                background: mode === m ? 'rgba(255,255,255,0.18)' : 'transparent',
+                color: mode === m ? '#fff' : 'rgba(255,255,255,0.45)',
+                borderLeft: mode === m ? '3px solid #fff' : '3px solid transparent',
+              }}>
+              {m === 'login' ? 'LOGIN' : 'SIGN UP'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Right panel — full height, light */}
+      <div style={{ flex: 1, background: '#f0f0f5', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 48px' }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
+
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: '#1a202c', textAlign: 'center', marginBottom: 6, letterSpacing: '-0.3px' }}>
+            {mode === 'login' ? 'LOGIN' : 'SIGN UP'}
+          </h2>
+          <p style={{ fontSize: 13, color: '#718096', textAlign: 'center', marginBottom: 32 }}>
+            {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
+          </p>
 
           <AnimatePresence mode="wait">
-            <motion.form key={mode} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.12 }} onSubmit={handleSubmit}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <motion.form key={mode}
+              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.12 }}
+              onSubmit={handleSubmit}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
                 {mode === 'register' && (
-                  <div>
-                    <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" style={inp(errors.full_name)} />
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><User size={14} /></span>
+                    <input name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" style={inputStyle(errors.full_name)} />
                     {errors.full_name && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.full_name}</p>}
                   </div>
                 )}
 
-                <div>
-                  <input name="username" value={form.username} onChange={handleChange} placeholder="Username" autoComplete="username" style={inp(errors.username)} />
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><User size={14} /></span>
+                  <input name="username" value={form.username} onChange={handleChange} placeholder="Username" autoComplete="username" style={inputStyle(errors.username)} />
                   {errors.username && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.username}</p>}
                 </div>
 
                 {mode === 'register' && (
-                  <div>
-                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email Address" style={inp(errors.email)} />
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><User size={14} /></span>
+                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email Address" style={inputStyle(errors.email)} />
                     {errors.email && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.email}</p>}
                   </div>
                 )}
 
-                <div>
-                  <div style={{ position: 'relative' }}>
-                    <input name="password" type={showPass ? 'text' : 'password'} value={form.password} onChange={handleChange} placeholder="Password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} style={{ ...inp(errors.password), paddingRight: 36 }} />
-                    <button type="button" onClick={() => setShowPass(p => !p)} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#bbb', padding: 0, display: 'flex' }}>
-                      {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
+                <div style={{ position: 'relative' }}>
+                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><Lock size={14} /></span>
+                  <input name="password" type={showPass ? 'text' : 'password'}
+                    value={form.password} onChange={handleChange} placeholder="Password"
+                    autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    style={{ ...inputStyle(errors.password), paddingRight: 42 }} />
+                  <button type="button" onClick={() => setShowPass(p => !p)}
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', padding: 0, display: 'flex' }}>
+                    {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
                   {errors.password && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.password}</p>}
                 </div>
 
                 {mode === 'register' && (
-                  <div>
-                    <input name="confirm_password" type={showPass ? 'text' : 'password'} value={form.confirm_password} onChange={handleChange} placeholder="Confirm Password" autoComplete="new-password" style={inp(errors.confirm_password)} />
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa', display: 'flex' }}><Lock size={14} /></span>
+                    <input name="confirm_password" type={showPass ? 'text' : 'password'}
+                      value={form.confirm_password} onChange={handleChange} placeholder="Confirm Password"
+                      autoComplete="new-password" style={inputStyle(errors.confirm_password)} />
                     {errors.confirm_password && <p style={{ fontSize: 11, color: '#e53e3e', marginTop: 3 }}>{errors.confirm_password}</p>}
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
-                  <motion.button type="submit" disabled={loading} whileTap={{ scale: 0.97 }}
-                    style={{ padding: '10px 28px', borderRadius: 4, border: 'none', background: DARK, color: '#fff', fontWeight: 700, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'inherit', letterSpacing: '0.05em' }}>
-                    {loading ? <Loader2 size={14} className="animate-spin" /> : mode === 'login' ? 'LOGIN' : 'CREATE'}
-                  </motion.button>
-                </div>
-
-                <p style={{ fontSize: 12, color: '#aaa', textAlign: 'center', marginTop: 4 }}>
-                  {mode === 'login' ? "No account? " : "Have an account? "}
-                  <button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setErrors({}) }}
-                    style={{ color: DARK, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}>
-                    {mode === 'login' ? 'Sign Up' : 'Sign In'}
-                  </button>
-                </p>
+                <motion.button type="submit" disabled={loading}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    width: '100%', padding: '13px 0', borderRadius: 8, border: 'none',
+                    background: MID, color: '#fff', fontWeight: 700, fontSize: 13,
+                    cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                    fontFamily: 'inherit', letterSpacing: '0.1em', marginTop: 6,
+                  }}>
+                  {loading ? <Loader2 size={15} className="animate-spin" /> : mode === 'login' ? 'LOGIN' : 'CREATE ACCOUNT'}
+                </motion.button>
               </div>
             </motion.form>
           </AnimatePresence>
