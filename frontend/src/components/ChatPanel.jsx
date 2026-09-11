@@ -5,7 +5,7 @@ import MessageBubble from './MessageBubble'
 import TypingIndicator from './TypingIndicator'
 import { chatStreamUrl, chatPost } from '../api'
 
-const CAT_IMG = '/study-mascot-cat.png'
+const CAT_IMG = '/study-mascot-cat.gif'
 
 export default function ChatPanel() {
   const [messages, setMessages] = useState(() => {
@@ -141,12 +141,9 @@ export default function ChatPanel() {
 
             {/* Cat + heading */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 40 }}>
-              <motion.img
+              <img
                 src={CAT_IMG}
                 alt="Study cat"
-                initial={{ y: 0 }}
-                animate={{ y: [-6, 0, -6] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 style={{ width: 100, height: 100, objectFit: 'contain', borderRadius: 16 }}
                 onError={e => { e.target.style.display = 'none' }}
               />
