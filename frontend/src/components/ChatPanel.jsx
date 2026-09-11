@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Square, Zap, Trash2, Upload, Plus } from 'lucide-react'
+import { Send, Square, Zap, Trash2, Upload, Youtube, Plus } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import TypingIndicator from './TypingIndicator'
 import { chatStreamUrl, chatPost } from '../api'
 
-// Cat image from the reference (Lofi study cat)
-const CAT_IMG = 'https://i.imgur.com/QZETPSw.png'
+const CAT_IMG = '/study-mascot-cat.png'
 
 export default function ChatPanel() {
   const [messages, setMessages] = useState(() => {
@@ -162,7 +161,7 @@ export default function ChatPanel() {
               {[
                 { icon: <Upload size={20} color="#5b6af0" />, label: 'Upload file', sub: 'PDF, TXT...', bg: '#eff1fe' },
                 { icon: <span style={{ fontSize: 20 }}>📋</span>, label: 'Ask a question', sub: 'Type anything', bg: '#f0fdf4' },
-                { icon: <Zap size={20} color="#f59e0b" />, label: 'Quick quiz', sub: 'From your docs', bg: '#fffbeb' },
+                { icon: <Youtube size={20} color="#ef4444" />, label: 'YouTube', sub: 'Paste a link', bg: '#fef2f2' },
               ].map(card => (
                 <motion.div key={card.label}
                   whileHover={{ scale: 1.03, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
