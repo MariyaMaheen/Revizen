@@ -10,12 +10,12 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #0a0e1a;
-  color: #e8eaf0;
+  background: #f4f6fb;
+  color: #1a1d2e;
   font-family: 'Inter', sans-serif;
 }
 
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1e2a3a; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #00c896; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
