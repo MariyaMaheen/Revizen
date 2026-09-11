@@ -25,12 +25,7 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, addTo
 
       {/* Top — app name */}
       <div style={{ padding: '20px 16px 14px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 26, height: 26, borderRadius: 8, background: '#5b6af0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontWeight: 800, fontSize: 13 }}>R</span>
-          </div>
-          <span style={{ color: INK, fontWeight: 800, fontSize: 16, letterSpacing: '-0.2px' }}>Revizen</span>
-        </div>
+        <span style={{ color: INK, fontWeight: 800, fontSize: 18, letterSpacing: '-0.2px' }}>Revizen</span>
       </div>
 
       {/* Nav section */}
