@@ -9,22 +9,20 @@ import FlashcardPanel from './components/FlashcardPanel'
 import InsightsPanel from './components/InsightsPanel'
 import Toast from './components/Toast'
 
-const TABS = ['chat', 'quiz', 'summary', 'flashcards', 'insights']
-
 const tabVariants = {
-  enter: { opacity: 0, x: 20 },
-  center: { opacity: 1, x: 0, transition: { duration: 0.25 } },
-  exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
+  enter:  { opacity: 0, y: 10 },
+  center: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+  exit:   { opacity: 0, y: -10, transition: { duration: 0.15 } },
 }
 
 function TabPanel({ tab }) {
   switch (tab) {
-    case 'chat': return <ChatPanel />
-    case 'quiz': return <QuizPanel />
-    case 'summary': return <SummaryPanel />
+    case 'chat':       return <ChatPanel />
+    case 'quiz':       return <QuizPanel />
+    case 'summary':    return <SummaryPanel />
     case 'flashcards': return <FlashcardPanel />
-    case 'insights': return <InsightsPanel />
-    default: return <ChatPanel />
+    case 'insights':   return <InsightsPanel />
+    default:           return <ChatPanel />
   }
 }
 
@@ -36,9 +34,7 @@ export default function App() {
 
   useEffect(() => {
     const stored = localStorage.getItem('revizen_user')
-    if (stored) {
-      try { setUser(JSON.parse(stored)) } catch {}
-    }
+    if (stored) { try { setUser(JSON.parse(stored)) } catch {} }
   }, [])
 
   function addToast(message, type = 'success') {
@@ -47,13 +43,7 @@ export default function App() {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4000)
   }
 
-  function removeToast(id) {
-    setToasts(prev => prev.filter(t => t.id !== id))
-  }
-
-  function handleLogin(userData) {
-    setUser(userData)
-  }
+  function handleLogin(userData) { setUser(userData) }
 
   function handleLogout() {
     localStorage.removeItem('revizen_token')
@@ -61,49 +51,33 @@ export default function App() {
     setUser(null)
   }
 
-  function handleUploadComplete() {
-    setDocRefreshKey(k => k + 1)
-  }
-
-  if (!user) {
-    return <Login onLogin={handleLogin} addToast={addToast} />
-  }
+  if (!user) return <Login onLogin={handleLogin} addToast={addToast} />
 
   return (
-    <div className="flex h-screen overflow-hidden bg-bg text-text-primary font-sans">
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#f4f6fb', fontFamily: 'Inter, sans-serif' }}>
       <Sidebar
-        user={user}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onLogout={handleLogout}
-        addToast={addToast}
-        onUploadComplete={handleUploadComplete}
+        user={user} activeTab={activeTab} setActiveTab={setActiveTab}
+        onLogout={handleLogout} addToast={addToast}
+        onUploadComplete={() => setDocRefreshKey(k => k + 1)}
         docRefreshKey={docRefreshKey}
       />
 
-      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', paddingBottom: 0 }} className="pb-16 md:pb-0">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            variants={tabVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            className="flex-1 flex flex-col overflow-hidden"
-          >
+          <motion.div key={activeTab} variants={tabVariants} initial="enter" animate="center" exit="exit"
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             <TabPanel tab={activeTab} />
           </motion.div>
         </AnimatePresence>
       </main>
 
-      {/* Toast container */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 50, display: 'flex', flexDirection: 'column', gap: 8 }}>
         <AnimatePresence>
-          {toasts.map(toast => (
-            <Toast key={toast.id} {...toast} onRemove={removeToast} />
-          ))}
+          {toasts.map(toast => <Toast key={toast.id} {...toast} onRemove={removeToast} />)}
         </AnimatePresence>
       </div>
     </div>
   )
+
+  function removeToast(id) { setToasts(prev => prev.filter(t => t.id !== id)) }
 }
