@@ -160,7 +160,6 @@ export default function ChatPanel() {
             <div style={{ display: 'flex', gap: 14, marginBottom: 32, flexWrap: 'wrap', justifyContent: 'center' }}>
               {[
                 { icon: <Upload size={20} color="#5b6af0" />, label: 'Upload file', sub: 'PDF, TXT...', bg: '#eff1fe' },
-                { icon: <span style={{ fontSize: 20 }}>📋</span>, label: 'Ask a question', sub: 'Type anything', bg: '#f0fdf4' },
                 { icon: <Youtube size={20} color="#ef4444" />, label: 'YouTube', sub: 'Paste a link', bg: '#fef2f2' },
               ].map(card => (
                 <motion.div key={card.label}
