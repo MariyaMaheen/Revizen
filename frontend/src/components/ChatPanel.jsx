@@ -161,7 +161,7 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
   const isEmpty = messages.length === 0 && !streaming
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#f4f6fb', fontFamily: 'Inter, sans-serif' }}>
+    <div className="pb-16 md:pb-0" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#f4f6fb', fontFamily: 'Inter, sans-serif' }}>
 
       <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleFileSelected} style={{ display: 'none' }} />
 
