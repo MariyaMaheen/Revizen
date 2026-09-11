@@ -1,24 +1,16 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { MessageSquare, BookOpen, FileText, CreditCard, BarChart3, LogOut, Menu, X, Flame, Upload } from 'lucide-react'
+import { MessageSquare, BookOpen, FileText, CreditCard, BarChart3, LogOut, Menu, X, Flame } from 'lucide-react'
 import FileUpload from './FileUpload'
 import DocumentList from './DocumentList'
 
 const NAV_ITEMS = [
-  { id: 'chat',       icon: <MessageSquare size={16} />, label: 'Smart Chat' },
-  { id: 'quiz',       icon: <BookOpen size={16} />,      label: 'Practice Quiz' },
-  { id: 'flashcards', icon: <CreditCard size={16} />,    label: 'Flashcards' },
-  { id: 'summary',    icon: <FileText size={16} />,      label: 'Summary' },
-  { id: 'insights',   icon: <BarChart3 size={16} />,     label: 'Insights' },
+  { id: 'chat',       icon: <MessageSquare size={16} />, label: 'Smart Chat',     sub: 'Page citations sync' },
+  { id: 'quiz',       icon: <BookOpen size={16} />,      label: 'Practice Quiz',  sub: 'High yield focus' },
+  { id: 'flashcards', icon: <CreditCard size={16} />,    label: 'Flashcards',     sub: 'Spaced recall loop' },
+  { id: 'summary',    icon: <FileText size={16} />,      label: 'Summary',        sub: 'Cheat sheet ready' },
+  { id: 'insights',   icon: <BarChart3 size={16} />,     label: 'Insights',       sub: 'Weak area tracker' },
 ]
-
-const NAV_DESC = {
-  chat:       'Page citations sync',
-  quiz:       'High yield focus',
-  flashcards: 'Spaced recall loop',
-  summary:    'Cheat sheet ready',
-  insights:   'Weak area tracker',
-}
 
 function getGreeting(name) {
   const h = new Date().getHours()
@@ -26,13 +18,12 @@ function getGreeting(name) {
   if (h >= 5 && h < 12) return `Good morning, ${first} 👋`
   if (h >= 12 && h < 17) return `Good afternoon, ${first} 👋`
   if (h >= 17 && h < 21) return `Good evening, ${first} 👋`
-  return `Studying late, ${first} 🌙`
+  return `Night owl mode, ${first} 🌙`
 }
 
 export default function Sidebar({ user, activeTab, setActiveTab, onLogout, addToast, onUploadComplete, docRefreshKey }) {
   const [greeting, setGreeting] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
-  const streak = 5 // placeholder — wire to backend later
 
   useEffect(() => {
     const update = () => setGreeting(getGreeting(user?.full_name || user?.username))
@@ -42,74 +33,67 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, addTo
   }, [user])
 
   const sidebarContent = (
-    <div className="flex flex-col h-full" style={{ background: '#0d1220' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#1e2235' }}>
 
       {/* Logo */}
-      <div className="px-4 pt-5 pb-4" style={{ borderBottom: '1px solid #1e2d40' }}>
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ background: '#00c896' }}>
-            <BookOpen size={14} color="#0a0e1a" />
+      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid #2d3450' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: '#5b6af0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>R</span>
           </div>
-          <span className="font-bold text-text-primary text-sm tracking-tight">Revizen</span>
-          <span className="ml-auto text-xs px-2 py-0.5 rounded-pill font-medium"
-            style={{ background: '#00c89618', color: '#00c896', border: '1px solid #00c89630' }}>
-            2.0
-          </span>
+          <div>
+            <p style={{ color: '#fff', fontWeight: 700, fontSize: 14, margin: 0, lineHeight: 1 }}>Revizen</p>
+            <p style={{ color: '#4a5568', fontSize: 10, margin: '2px 0 0', lineHeight: 1 }}>Study Brain</p>
+          </div>
+          <span style={{ marginLeft: 'auto', fontSize: 10, padding: '2px 8px', borderRadius: 20, background: '#2d3450', color: '#5b6af0', fontWeight: 600 }}>2.0</span>
         </div>
-
-        {/* Greeting + streak */}
-        <p className="text-sm font-semibold text-text-primary mb-1">{greeting}</p>
-        <div className="flex items-center gap-1.5">
-          <Flame size={12} style={{ color: '#ef4444' }} />
-          <span className="text-xs text-text-muted">{streak} day streak — keep it up!</span>
+        <p style={{ color: '#e2e8f0', fontSize: 13, fontWeight: 600, margin: '0 0 4px' }}>{greeting}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <Flame size={11} color="#ef4444" />
+          <span style={{ color: '#6b7280', fontSize: 11 }}>5 day streak — keep it up!</span>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="px-3 py-3 space-y-1">
+      <nav style={{ padding: '10px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
         {NAV_ITEMS.map(item => (
-          <motion.button
-            key={item.id}
+          <motion.button key={item.id}
             onClick={() => { setActiveTab(item.id); setMobileOpen(false) }}
             whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-btn text-left transition-all"
-            style={activeTab === item.id
-              ? { background: '#00c89618', border: '1px solid #00c89630' }
-              : { background: 'transparent', border: '1px solid transparent' }}>
-            <span style={{ color: activeTab === item.id ? '#00c896' : '#3d4f6b' }}>{item.icon}</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold truncate"
-                style={{ color: activeTab === item.id ? '#00c896' : '#e8eaf0' }}>
-                {item.label}
-              </p>
-              <p className="text-xs truncate" style={{ color: '#3d4f6b' }}>{NAV_DESC[item.id]}</p>
+            style={{
+              display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+              borderRadius: 8, border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%',
+              background: activeTab === item.id ? '#2d3450' : 'transparent',
+              transition: 'all 0.15s',
+            }}>
+            <span style={{ color: activeTab === item.id ? '#5b6af0' : '#4a5568', display: 'flex' }}>{item.icon}</span>
+            <div>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: activeTab === item.id ? '#fff' : '#a0aec0', lineHeight: 1 }}>{item.label}</p>
+              <p style={{ margin: '2px 0 0', fontSize: 10, color: '#4a5568', lineHeight: 1 }}>{item.sub}</p>
             </div>
           </motion.button>
         ))}
       </nav>
 
-      <div style={{ borderTop: '1px solid #1e2d40', margin: '0 12px' }} />
+      <div style={{ borderTop: '1px solid #2d3450', margin: '4px 10px' }} />
 
       {/* Upload + Docs */}
-      <div className="flex-1 overflow-y-auto">
+      <div style={{ flex: 1, overflowY: 'auto' }}>
         <FileUpload onUploadComplete={onUploadComplete} addToast={addToast} />
-        <div style={{ borderTop: '1px solid #1e2d40', margin: '4px 12px' }} />
+        <div style={{ borderTop: '1px solid #2d3450', margin: '4px 10px' }} />
         <DocumentList refreshKey={docRefreshKey} addToast={addToast} />
       </div>
 
       {/* User footer */}
-      <div className="px-4 py-3 flex items-center gap-3" style={{ borderTop: '1px solid #1e2d40' }}>
-        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs"
-          style={{ background: '#00c89620', color: '#00c896' }}>
-          {(user?.username || '?')[0].toUpperCase()}
+      <div style={{ borderTop: '1px solid #2d3450', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#2d3450', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ color: '#5b6af0', fontWeight: 700, fontSize: 12 }}>{(user?.username || '?')[0].toUpperCase()}</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-text-primary truncate">{user?.full_name || user?.username}</p>
-          <p className="text-xs truncate" style={{ color: '#3d4f6b' }}>{user?.email}</p>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.username}</p>
+          <p style={{ margin: 0, fontSize: 10, color: '#4a5568', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.email}</p>
         </div>
-        <button onClick={onLogout} title="Logout"
-          className="transition-colors hover:opacity-80" style={{ color: '#3d4f6b' }}>
+        <button onClick={onLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4a5568', display: 'flex', padding: 0 }}>
           <LogOut size={14} />
         </button>
       </div>
@@ -118,39 +102,31 @@ export default function Sidebar({ user, activeTab, setActiveTab, onLogout, addTo
 
   return (
     <>
-      {/* Desktop */}
-      <aside className="hidden md:flex flex-col w-56 flex-shrink-0"
-        style={{ background: '#0d1220', borderRight: '1px solid #1e2d40' }}>
+      <aside style={{ width: 220, flexShrink: 0, background: '#1e2235' }} className="hidden md:flex flex-col">
         {sidebarContent}
       </aside>
 
       {/* Mobile bottom nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex"
-        style={{ background: '#0d1220', borderTop: '1px solid #1e2d40' }}>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex" style={{ background: '#1e2235', borderTop: '1px solid #2d3450' }}>
         {NAV_ITEMS.slice(0, 4).map(item => (
           <button key={item.id} onClick={() => setActiveTab(item.id)}
-            className="flex-1 flex flex-col items-center py-2 gap-0.5 transition-colors"
-            style={{ color: activeTab === item.id ? '#00c896' : '#3d4f6b' }}>
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: activeTab === item.id ? '#5b6af0' : '#4a5568' }}>
             {item.icon}
-            <span className="text-xs">{item.label.split(' ')[0]}</span>
+            <span style={{ fontSize: 10 }}>{item.label.split(' ')[0]}</span>
           </button>
         ))}
         <button onClick={() => setMobileOpen(true)}
-          className="flex-1 flex flex-col items-center py-2 gap-0.5"
-          style={{ color: '#3d4f6b' }}>
+          style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0', gap: 3, background: 'none', border: 'none', cursor: 'pointer', color: '#4a5568' }}>
           <Menu size={16} />
-          <span className="text-xs">More</span>
+          <span style={{ fontSize: 10 }}>More</span>
         </button>
       </div>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setMobileOpen(false)} />
-          <motion.div initial={{ x: -300 }} animate={{ x: 0 }}
-            className="relative w-64 h-full shadow-2xl">
-            <button onClick={() => setMobileOpen(false)}
-              className="absolute top-3 right-3 z-10" style={{ color: '#6b7a99' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} onClick={() => setMobileOpen(false)} />
+          <motion.div initial={{ x: -280 }} animate={{ x: 0 }} style={{ position: 'relative', width: 240, height: '100%' }}>
+            <button onClick={() => setMobileOpen(false)} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', zIndex: 1 }}>
               <X size={16} />
             </button>
             {sidebarContent}
