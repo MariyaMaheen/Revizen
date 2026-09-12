@@ -175,3 +175,12 @@ export async function getInsights() {
   })
   return handleResponse(res)
 }
+
+export async function googleAuth(accessToken) {
+  const res = await fetch(`${BASE_URL}/api/v1/auth/google`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ access_token: accessToken }),
+  })
+  return handleResponse(res)
+}
