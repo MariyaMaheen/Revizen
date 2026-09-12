@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Square, Zap, Trash2, Upload, Youtube, Plus, Loader2 } from 'lucide-react'
+import { Send, Square, Zap, Trash2, Plus } from 'lucide-react'
 import MessageBubble from './MessageBubble'
 import TypingIndicator from './TypingIndicator'
-import { chatStreamUrl, chatPost, ingestFile, ingestYouTube } from '../api'
+import { chatStreamUrl, chatPost } from '../api'
 
-export default function ChatPanel({ addToast, onUploadComplete }) {
+const CAT_IMG = '/study-mascot-cat.gif'
+
+export default function ChatPanel() {
   const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem('revizen_chat')
@@ -16,11 +18,6 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
   const [streaming, setStreaming] = useState(false)
   const [streamMode, setStreamMode] = useState(true)
   const [currentToken, setCurrentToken] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [showYoutubeInput, setShowYoutubeInput] = useState(false)
-  const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [youtubeLoading, setYoutubeLoading] = useState(false)
   const bottomRef = useRef(null)
   const abortRef = useRef(null)
   const textareaRef = useRef(null)
@@ -112,46 +109,10 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
     }
   }
 
-  async function handleFileSelected(e) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    setUploadProgress(0)
-    try {
-      await ingestFile(file, (pct) => setUploadProgress(pct))
-      addToast?.(`${file.name} uploaded successfully`, 'success')
-      onUploadComplete?.()
-    } catch (err) {
-      addToast?.(err.message || 'Upload failed', 'error')
-    } finally {
-      setUploading(false)
-      setUploadProgress(0)
-      e.target.value = ''
-    }
-  }
-
-  async function handleYoutubeSubmit(e) {
-    e.preventDefault()
-    const url = youtubeUrl.trim()
-    if (!url) return
-    setYoutubeLoading(true)
-    try {
-      const result = await ingestYouTube(url)
-      addToast?.(`YouTube video indexed — ${result.chunks_indexed} chunks`, 'success')
-      onUploadComplete?.()
-      setYoutubeUrl('')
-      setShowYoutubeInput(false)
-    } catch (err) {
-      addToast?.(err.message || 'Failed to process YouTube video', 'error')
-    } finally {
-      setYoutubeLoading(false)
-    }
-  }
-
   const isEmpty = messages.length === 0 && !streaming
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#f4f6fb', fontFamily: 'Inter, sans-serif' }}>
+    <div className="pb-16 md:pb-0" style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#f4f6fb', fontFamily: 'Inter, sans-serif' }}>
 
       {/* Header */}
       <div style={{ padding: '16px 24px', borderBottom: '1px solid #e5e7eb', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
@@ -160,12 +121,12 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
         </h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setStreamMode(m => !m)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: '1px solid #e5e7eb', background: streamMode ? '#eff1fe' : '#fff', color: streamMode ? '#5b6af0' : '#6b7280', fontFamily: 'inherit' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: '1px solid #e5e7eb', background: streamMode ? '#eff1fe' : '#fff', color: streamMode ? '#5b6af0' : '#6b7280' }}>
             <Zap size={11} /> {streamMode ? 'Streaming' : 'Full'}
           </button>
           {messages.length > 0 && (
             <button onClick={handleClearChat}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: '1px solid #e5e7eb', background: '#fff', color: '#6b7280', fontFamily: 'inherit' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500, cursor: 'pointer', border: '1px solid #e5e7eb', background: '#fff', color: '#6b7280' }}>
               <Trash2 size={11} /> Clear
             </button>
           )}
@@ -174,67 +135,23 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
 
       {/* Body */}
       <div style={{ flex: 1, overflowY: 'auto', padding: isEmpty ? '0' : '16px 24px' }}>
+
         {isEmpty ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px 24px', textAlign: 'center' }}>
-            <div style={{ marginBottom: 40 }}>
-              <p style={{ margin: '0 0 4px', fontSize: 15, color: '#6b7280', fontWeight: 500 }}>What shall we</p>
-              <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: '#1a1d2e', lineHeight: 1 }}>Study?</p>
-            </div>
 
-            <div style={{ display: 'flex', gap: 14, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-
-              {/* Upload card — using label for reliable file picker */}
-              <label htmlFor="chat-file-input" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: uploading ? 'default' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eff1fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {uploading ? <Loader2 size={20} color="#5b6af0" /> : <Upload size={20} color="#5b6af0" />}
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1a1d2e' }}>
-                    {uploading ? `Uploading ${uploadProgress}%` : 'Upload file'}
-                  </p>
-                  <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9ca3af' }}>PDF, TXT...</p>
-                </div>
-              </label>
-              <input id="chat-file-input" type="file" accept=".pdf,.txt" onChange={handleFileSelected} style={{ display: 'none' }} disabled={uploading} />
-
-              {/* YouTube card */}
-              <div
-                onClick={() => setShowYoutubeInput(p => !p)}
-                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Youtube size={20} color="#ef4444" />
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1a1d2e' }}>YouTube</p>
-                  <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9ca3af' }}>Paste a link</p>
-                </div>
+            {/* Cat + heading */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <img
+                src={CAT_IMG}
+                alt="Study cat"
+                style={{ width: 100, height: 100, objectFit: 'contain', borderRadius: 16 }}
+                onError={e => { e.target.style.display = 'none' }}
+              />
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ margin: 0, fontSize: 15, color: '#6b7280', fontWeight: 500 }}>What shall we</p>
+                <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: '#1a1d2e', lineHeight: 1 }}>Study?</p>
               </div>
             </div>
-
-            <AnimatePresence>
-              {showYoutubeInput && (
-                <motion.form
-                  initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                  onSubmit={handleYoutubeSubmit}
-                  style={{ display: 'flex', gap: 8, marginBottom: 16, width: '100%', maxWidth: 400 }}>
-                  <input
-                    autoFocus
-                    value={youtubeUrl}
-                    onChange={e => setYoutubeUrl(e.target.value)}
-                    placeholder="https://youtube.com/watch?v=..."
-                    style={{ flex: 1, padding: '10px 14px', borderRadius: 10, border: '1.5px solid #5b6af0', outline: 'none', fontSize: 13, fontFamily: 'inherit', color: '#1a1d2e' }}
-                  />
-                  <button type="submit" disabled={!youtubeUrl.trim() || youtubeLoading}
-                    style={{ padding: '10px 16px', borderRadius: 10, border: 'none', background: youtubeUrl.trim() && !youtubeLoading ? '#5b6af0' : '#e5e7eb', color: youtubeUrl.trim() && !youtubeLoading ? '#fff' : '#9ca3af', fontWeight: 700, fontSize: 13, cursor: youtubeUrl.trim() && !youtubeLoading ? 'pointer' : 'not-allowed', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {youtubeLoading ? <><Loader2 size={13} /> Processing...</> : 'Continue'}
-                  </button>
-                </motion.form>
-              )}
-            </AnimatePresence>
           </div>
         ) : (
           <>
@@ -243,7 +160,7 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 16 }}>
                 <div style={{ maxWidth: 560, padding: '12px 16px', borderRadius: 16, borderTopLeftRadius: 4, background: '#fff', border: '1px solid #e5e7eb', color: '#1a1d2e', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                   {currentToken}
-                  <span style={{ display: 'inline-block', width: 6, height: 16, background: '#5b6af0', marginLeft: 2, verticalAlign: 'middle' }} />
+                  <span style={{ display: 'inline-block', width: 6, height: 16, background: '#5b6af0', marginLeft: 2, verticalAlign: 'middle', animation: 'pulse 1s infinite' }} />
                 </div>
               </motion.div>
             )}
@@ -256,10 +173,12 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
       {/* Input bar */}
       <div style={{ padding: '12px 24px 16px', background: '#fff', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, background: '#f4f6fb', borderRadius: 16, padding: '10px 14px', border: '1px solid #e5e7eb' }}>
-          <label htmlFor="chat-file-input" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 0, flexShrink: 0 }}>
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 0, flexShrink: 0 }}>
             <Plus size={18} />
-          </label>
-          <textarea ref={textareaRef} value={input}
+          </button>
+          <textarea
+            ref={textareaRef}
+            value={input}
             onChange={e => {
               setInput(e.target.value)
               e.target.style.height = 'auto'
