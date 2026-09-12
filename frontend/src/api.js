@@ -27,7 +27,6 @@ async function handleResponse(res) {
   return res.json()
 }
 
-// Auth
 export async function register(username, email, password, full_name) {
   const res = await fetch(`${BASE_URL}/api/v1/auth/register`, {
     method: 'POST',
@@ -46,15 +45,6 @@ export async function login(username, password) {
   return handleResponse(res)
 }
 
-export async function googleAuth(access_token) {
-  const res = await fetch(`${BASE_URL}/api/v1/auth/google`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ access_token }),
-  })
-  return handleResponse(res)
-}
-
 export async function getMe() {
   const res = await fetch(`${BASE_URL}/api/v1/auth/me`, {
     headers: { ...authHeaders() },
@@ -62,7 +52,6 @@ export async function getMe() {
   return handleResponse(res)
 }
 
-// Chat (non-streaming)
 export async function chatPost(question, history = []) {
   const res = await fetch(`${BASE_URL}/api/v1/chat`, {
     method: 'POST',
@@ -72,13 +61,11 @@ export async function chatPost(question, history = []) {
   return handleResponse(res)
 }
 
-// Chat stream URL builder
 export function chatStreamUrl(question) {
   const encoded = encodeURIComponent(question)
   return `${BASE_URL}/api/v1/chat/stream?question=${encoded}`
 }
 
-// Ingest
 export async function ingestFile(file, onProgress) {
   const formData = new FormData()
   formData.append('file', file)
@@ -122,7 +109,15 @@ export async function ingestFile(file, onProgress) {
   })
 }
 
-// Documents
+export async function ingestYouTube(url) {
+  const res = await fetch(`${BASE_URL}/api/v1/ingest/youtube`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify({ url }),
+  })
+  return handleResponse(res)
+}
+
 export async function getDocuments() {
   const res = await fetch(`${BASE_URL}/api/v1/documents`, {
     headers: { ...authHeaders() },
@@ -138,7 +133,6 @@ export async function deleteDocument(filename) {
   return handleResponse(res)
 }
 
-// Quiz
 export async function generateQuiz(topic, difficulty, count) {
   const res = await fetch(`${BASE_URL}/api/v1/quiz`, {
     method: 'POST',
@@ -157,7 +151,6 @@ export async function saveQuizScore(topic, score, correct, total) {
   return handleResponse(res)
 }
 
-// Summary
 export async function generateSummary(topic, style) {
   const res = await fetch(`${BASE_URL}/api/v1/summarize`, {
     method: 'POST',
@@ -167,7 +160,6 @@ export async function generateSummary(topic, style) {
   return handleResponse(res)
 }
 
-// Flashcards
 export async function generateFlashcards(topic, count) {
   const res = await fetch(`${BASE_URL}/api/v1/flashcards`, {
     method: 'POST',
@@ -177,7 +169,6 @@ export async function generateFlashcards(topic, count) {
   return handleResponse(res)
 }
 
-// Insights
 export async function getInsights() {
   const res = await fetch(`${BASE_URL}/api/v1/insights`, {
     headers: { ...authHeaders() },
