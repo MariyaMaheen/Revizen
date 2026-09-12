@@ -24,7 +24,6 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
   const bottomRef = useRef(null)
   const abortRef = useRef(null)
   const textareaRef = useRef(null)
-  const fileInputRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -154,8 +153,6 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#f4f6fb', fontFamily: 'Inter, sans-serif' }}>
 
-      <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleFileSelected} style={{ display: 'none' }} />
-
       {/* Header */}
       <div style={{ padding: '16px 24px', borderBottom: '1px solid #e5e7eb', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1a1d2e' }}>
@@ -186,13 +183,10 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
 
             <div style={{ display: 'flex', gap: 14, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
 
-              {/* Upload card */}
-              <div
-                onClick={() => { if (!uploading) fileInputRef.current?.click() }}
-                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: uploading ? 'default' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, transition: 'box-shadow 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+              {/* Upload card — using label for reliable file picker */}
+              <label htmlFor="chat-file-input" style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: uploading ? 'default' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}
-              >
+                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eff1fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {uploading ? <Loader2 size={20} color="#5b6af0" /> : <Upload size={20} color="#5b6af0" />}
                 </div>
@@ -202,15 +196,15 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
                   </p>
                   <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9ca3af' }}>PDF, TXT...</p>
                 </div>
-              </div>
+              </label>
+              <input id="chat-file-input" type="file" accept=".pdf,.txt" onChange={handleFileSelected} style={{ display: 'none' }} disabled={uploading} />
 
               {/* YouTube card */}
               <div
                 onClick={() => setShowYoutubeInput(p => !p)}
-                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, transition: 'box-shadow 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', transition: 'box-shadow 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}
-              >
+                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Youtube size={20} color="#ef4444" />
                 </div>
@@ -262,10 +256,9 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
       {/* Input bar */}
       <div style={{ padding: '12px 24px 16px', background: '#fff', borderTop: '1px solid #e5e7eb', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, background: '#f4f6fb', borderRadius: 16, padding: '10px 14px', border: '1px solid #e5e7eb' }}>
-          <button onClick={() => fileInputRef.current?.click()}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 0, flexShrink: 0 }}>
+          <label htmlFor="chat-file-input" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', padding: 0, flexShrink: 0 }}>
             <Plus size={18} />
-          </button>
+          </label>
           <textarea ref={textareaRef} value={input}
             onChange={e => {
               setInput(e.target.value)
