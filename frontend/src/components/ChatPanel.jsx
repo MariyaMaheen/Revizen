@@ -6,7 +6,7 @@ import TypingIndicator from './TypingIndicator'
 import { chatStreamUrl, chatPost, ingestFile, ingestYouTube } from '../api'
 
 export default function ChatPanel({ addToast, onUploadComplete }) {
-  const [messages, setMessages] = useState(() => {
+  const [messages, setMessages] = useState(() => { 
     try {
       const saved = localStorage.getItem('revizen_chat')
       return saved ? JSON.parse(saved) : []
