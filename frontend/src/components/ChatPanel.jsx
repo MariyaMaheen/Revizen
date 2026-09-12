@@ -6,7 +6,7 @@ import TypingIndicator from './TypingIndicator'
 import { chatStreamUrl, chatPost, ingestFile, ingestYouTube } from '../api'
 
 export default function ChatPanel({ addToast, onUploadComplete }) {
-  const [messages, setMessages] = useState(() => { 
+  const [messages, setMessages] = useState(() => {
     try {
       const saved = localStorage.getItem('revizen_chat')
       return saved ? JSON.parse(saved) : []
@@ -185,12 +185,16 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
             </div>
 
             <div style={{ display: 'flex', gap: 14, marginBottom: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-              <motion.div onClick={() => !uploading && fileInputRef.current?.click()}
-                whileHover={{ scale: 1.03, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-                whileTap={{ scale: 0.98 }}
-                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: uploading ? 'default' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+
+              {/* Upload card */}
+              <div
+                onClick={() => { if (!uploading) fileInputRef.current?.click() }}
+                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: uploading ? 'default' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, transition: 'box-shadow 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}
+              >
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eff1fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {uploading ? <Loader2 size={20} color="#5b6af0" className="animate-spin" /> : <Upload size={20} color="#5b6af0" />}
+                  {uploading ? <Loader2 size={20} color="#5b6af0" /> : <Upload size={20} color="#5b6af0" />}
                 </div>
                 <div>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1a1d2e' }}>
@@ -198,12 +202,15 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
                   </p>
                   <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9ca3af' }}>PDF, TXT...</p>
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div onClick={() => setShowYoutubeInput(p => !p)}
-                whileHover={{ scale: 1.03, boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
-                whileTap={{ scale: 0.98 }}
-                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              {/* YouTube card */}
+              <div
+                onClick={() => setShowYoutubeInput(p => !p)}
+                style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: '20px 24px', minWidth: 130, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, transition: 'box-shadow 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
+                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'}
+              >
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Youtube size={20} color="#ef4444" />
                 </div>
@@ -211,7 +218,7 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1a1d2e' }}>YouTube</p>
                   <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9ca3af' }}>Paste a link</p>
                 </div>
-              </motion.div>
+              </div>
             </div>
 
             <AnimatePresence>
@@ -229,7 +236,7 @@ export default function ChatPanel({ addToast, onUploadComplete }) {
                   />
                   <button type="submit" disabled={!youtubeUrl.trim() || youtubeLoading}
                     style={{ padding: '10px 16px', borderRadius: 10, border: 'none', background: youtubeUrl.trim() && !youtubeLoading ? '#5b6af0' : '#e5e7eb', color: youtubeUrl.trim() && !youtubeLoading ? '#fff' : '#9ca3af', fontWeight: 700, fontSize: 13, cursor: youtubeUrl.trim() && !youtubeLoading ? 'pointer' : 'not-allowed', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {youtubeLoading ? <><Loader2 size={13} className="animate-spin" /> Processing...</> : 'Continue'}
+                    {youtubeLoading ? <><Loader2 size={13} /> Processing...</> : 'Continue'}
                   </button>
                 </motion.form>
               )}
