@@ -101,8 +101,10 @@ export async function ingestFile(file, onProgress) {
     }
 
     xhr.onerror = () => reject(new Error('Network error'))
+    xhr.ontimeout = () => reject(new Error('Upload timed out — file may be too large or complex'))
 
     xhr.open('POST', `${BASE_URL}/api/v1/ingest`)
+    xhr.timeout = 180000  // 3 minutes
     const token = getToken()
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
     xhr.send(formData)
