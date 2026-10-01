@@ -1,64 +1,55 @@
 from typing import Tuple
-import base64
 
 
 OCR_SPACE_API_KEY = "K85164985288957"
-MAX_OCR_PAGES = 15
 
 
-def _ocr_page_image(image_bytes: bytes) -> str:
+def _ocr_pdf_bytes(file_bytes: bytes) -> str:
+    """Send entire PDF to OCR.space file upload endpoint."""
     import httpx
-    b64 = base64.b64encode(image_bytes).decode()
-    payload = {
-        "base64Image": f"data:image/png;base64,{b64}",
-        "apikey": OCR_SPACE_API_KEY,
-        "language": "eng",
-        "isOverlayRequired": False,
-        "OCREngine": 1,
-    }
     try:
-        resp = httpx.post("https://api.ocr.space/parse/image", data=payload, timeout=15)
+        resp = httpx.post(
+            "https://api.ocr.space/parse/image",
+            files={"file": ("document.pdf", file_bytes, "application/pdf")},
+            data={
+                "apikey": OCR_SPACE_API_KEY,
+                "language": "eng",
+                "isOverlayRequired": False,
+                "OCREngine": 1,
+                "scale": True,
+            },
+            timeout=60,
+        )
         result = resp.json()
         if result.get("IsErroredOnProcessing"):
             return ""
         parsed = result.get("ParsedResults", [])
-        if parsed:
-            return parsed[0].get("ParsedText", "")
+        return "\n\n".join(p.get("ParsedText", "") for p in parsed if p.get("ParsedText"))
     except Exception:
         return ""
-    return ""
 
 
 def extract_pdf(file_bytes: bytes) -> Tuple[str, int]:
+    """Extract text from PDF. Uses PyMuPDF first, falls back to OCR.space API."""
     import fitz
     pages_processed = 0
     text_parts = []
-    ocr_pages_used = 0
 
     with fitz.open(stream=file_bytes, filetype="pdf") as doc:
-        for page_num, page in enumerate(doc):
+        total_pages = len(doc)
+        for page in doc:
             page_text = page.get_text("text")
-
             if page_text and page_text.strip():
                 text_parts.append(page_text.strip())
                 pages_processed += 1
-            elif ocr_pages_used < MAX_OCR_PAGES:
-                try:
-                    pix = page.get_pixmap(dpi=120)
-                    img_bytes = pix.tobytes("png")
-                    del pix
-                    ocr_text = _ocr_page_image(img_bytes)
-                    if ocr_text and ocr_text.strip():
-                        text_parts.append(ocr_text.strip())
-                        pages_processed += 1
-                    ocr_pages_used += 1
-                except Exception:
-                    pass
-
             page = None
 
     if not text_parts:
-        raise ValueError("No text could be extracted. The PDF may be image-based with no readable content.")
+        # Scanned PDF — send to OCR.space directly (no image rendering in memory)
+        ocr_text = _ocr_pdf_bytes(file_bytes)
+        if ocr_text and ocr_text.strip():
+            text_parts = [ocr_text]
+            pages_processed = 1
 
     return "\n\n".join(text_parts), pages_processed
 
