@@ -1,3 +1,4 @@
+import gc
 from datetime import datetime, timezone
 import re
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
@@ -12,11 +13,38 @@ from services.insights import add_document
 
 router = APIRouter()
 
-MAX_FILE_SIZE = 50 * 1024 * 1024
+MAX_FILE_SIZE = 10 * 1024 * 1024   # 10MB (was 50MB, too big for 512MB RAM)
+MAX_CHUNKS = 400                   # cap work per upload
+EMBED_BATCH = 32                   # embed + store this many chunks at a time
 
 
+def _embed_and_store(request, user_id, filename, chunks, extra_meta):
+    """Embed and upsert in small batches so memory stays flat."""
+    embedder = request.app.state.embedder
+    chroma_client = get_chroma_client(request)
+    timestamp = datetime.now(timezone.utc).isoformat()
+
+    for start in range(0, len(chunks), EMBED_BATCH):
+        batch = chunks[start:start + EMBED_BATCH]
+        embeddings = embed_texts(embedder, batch)
+        metadatas, ids = [], []
+        for j, _ in enumerate(batch):
+            i = start + j
+            meta = {"filename": filename, "chunk_index": i, "upload_timestamp": timestamp}
+            meta.update(extra_meta)
+            metadatas.append(meta)
+            ids.append(f"{filename}_chunk_{i}")
+        upsert_chunks(chroma_client, user_id, batch, embeddings, metadatas, ids)
+        del embeddings
+        gc.collect()
+
+    add_document(user_id, filename, len(chunks))
+
+
+# NOTE: plain `def` (not async) so heavy work runs in a thread
+# and /health stays responsive while a file is being processed.
 @router.post("/ingest")
-async def ingest(
+def ingest(
     request: Request,
     file: UploadFile = File(...),
     current_user=Depends(get_current_user),
@@ -27,10 +55,10 @@ async def ingest(
     if ext not in ("pdf", "txt"):
         raise HTTPException(status_code=400, detail="Only PDF and TXT files are supported")
 
-    file_bytes = await file.read()
-
+    # read at most MAX+1 bytes so a huge file never fully loads into RAM
+    file_bytes = file.file.read(MAX_FILE_SIZE + 1)
     if len(file_bytes) > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="File too large. Maximum size is 50MB")
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 10MB")
 
     pages_processed = 0
     try:
@@ -41,31 +69,28 @@ async def ingest(
             pages_processed = 1
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Failed to extract text: {str(e)}")
+    finally:
+        del file_bytes
+        gc.collect()
 
     if not text.strip():
-        raise HTTPException(status_code=422, detail="No text could be extracted from this file")
+        raise HTTPException(
+            status_code=422,
+            detail="No text could be extracted from this file (scanned PDFs over ~1MB/page may not be supported)",
+        )
 
     chunks = chunk_text(text)
+    del text
     if not chunks:
         raise HTTPException(status_code=422, detail="No content chunks produced from this file")
+    if len(chunks) > MAX_CHUNKS:
+        chunks = chunks[:MAX_CHUNKS]
 
-    embedder = request.app.state.embedder
-    embeddings = embed_texts(embedder, chunks)
-
-    timestamp = datetime.now(timezone.utc).isoformat()
-    metadatas = []
-    ids = []
-    for i, chunk in enumerate(chunks):
-        meta = {"filename": filename, "chunk_index": i, "upload_timestamp": timestamp}
-        if ext == "pdf":
-            meta["pages_processed"] = pages_processed
-        metadatas.append(meta)
-        ids.append(f"{filename}_chunk_{i}")
-
-    chroma_client = get_chroma_client(request)
-    user_id = current_user["id"]
-    upsert_chunks(chroma_client, user_id, chunks, embeddings, metadatas, ids)
-    add_document(user_id, filename, len(chunks))
+    extra = {"pages_processed": pages_processed} if ext == "pdf" else {}
+    try:
+        _embed_and_store(request, current_user["id"], filename, chunks, extra)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to index file: {str(e)}")
 
     return {"filename": filename, "chunks_indexed": len(chunks), "pages_processed": pages_processed}
 
@@ -88,7 +113,7 @@ def extract_video_id(url: str) -> str:
 
 
 @router.post("/ingest/youtube")
-async def ingest_youtube(
+def ingest_youtube(
     body: YouTubeRequest,
     request: Request,
     current_user=Depends(get_current_user),
@@ -115,25 +140,12 @@ async def ingest_youtube(
     chunks = chunk_text(text)
     if not chunks:
         raise HTTPException(status_code=422, detail="No content could be extracted from transcript")
+    if len(chunks) > MAX_CHUNKS:
+        chunks = chunks[:MAX_CHUNKS]
 
-    embedder = request.app.state.embedder
-    embeddings = embed_texts(embedder, chunks)
-
-    timestamp = datetime.now(timezone.utc).isoformat()
-    metadatas = []
-    ids = []
-    for i, chunk in enumerate(chunks):
-        metadatas.append({
-            "filename": filename,
-            "chunk_index": i,
-            "upload_timestamp": timestamp,
-            "source": body.url
-        })
-        ids.append(f"{filename}_chunk_{i}")
-
-    chroma_client = get_chroma_client(request)
-    user_id = current_user["id"]
-    upsert_chunks(chroma_client, user_id, chunks, embeddings, metadatas, ids)
-    add_document(user_id, filename, len(chunks))
+    try:
+        _embed_and_store(request, current_user["id"], filename, chunks, {"source": body.url})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to index transcript: {str(e)}")
 
     return {"filename": filename, "chunks_indexed": len(chunks), "video_id": video_id}
